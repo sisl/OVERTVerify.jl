@@ -1,9 +1,8 @@
 include("../../models/problems.jl")
-include("../../OverApprox/src/overapprox_nd_relational.jl")
-include("../../OverApprox/src/overt_parser.jl")
 include("../../MIP/src/overt_to_mip.jl")
 include("../../MIP/src/mip_utils.jl")
 include("../../models/car/simple_car.jl")
+include("../../MIP/src/overt_parser_minimal.jl")
 using JLD2
 using LazySets
 

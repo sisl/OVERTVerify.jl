@@ -1,12 +1,11 @@
 # acc reachability script
 # ENV["JULIA_DEBUG"] = Main # for debugging
 include("../../models/problems.jl")
-include("../../OverApprox/src/overapprox_nd_relational.jl")
-include("../../OverApprox/src/overt_parser.jl")
 include("../../MIP/src/overt_to_mip.jl")
 include("../../MIP/src/mip_utils.jl")
 include("../../models/acc/acc.jl")
 include("../../MIP/src/logic.jl")
+include("../../MIP/src/overt_parser_minimal.jl")
 using JLD2
 
 controller = "acc_controller"
@@ -43,7 +42,7 @@ t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
 
-# TODO: Intersect all sets with output constraint and see if
+# Intersect all sets with output constraint and see if
 # reachable set is fully within safe set OR check to see if it ever intersects unsafe set
 # they are equivalent
 # We want the measurement to be greater than 10, always. So the unsafe set if <= 10

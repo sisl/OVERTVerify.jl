@@ -1,3 +1,5 @@
+using OVERT
+
 pend_mass, pend_len, grav_const, friction = 0.5, 0.5, 1., 0.
 
 function single_pend_dynamics(x::Array{T, 1} where {T <: Real},
