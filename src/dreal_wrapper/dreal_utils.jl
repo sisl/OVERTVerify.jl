@@ -140,13 +140,13 @@ function add_dynamics(x::Array{Symbol}, u::Array{Symbol}, N::Int, dynamics_map::
     return [Meta.parse("$(v)_$(N+1)") for v in x]
 end
 
-function define_relu()
-    return ["(define-fun relu ((arg Real)) Real (max arg 0))"]
-end
+# function define_relu()
+#     return ["(define-fun relu ((arg Real)) Real (max arg 0))"]
+# end
 
 function gen_full_formula(formula::SMTLibFormula)
     pushfirst!(formula.formula, declare_reals(formula.stats)...)
-    pushfirst!(formula.formula, define_relu()...)
+    pushfirst!(formula.formula, define_relu())
     pushfirst!(formula.formula, header()...)
     push!(formula.formula, footer()...)
     return formula
