@@ -1,11 +1,5 @@
 # logical functions
 
-mutable struct Property
-    temporal # e.g. "always_true" or "eventually_true"
-    type # e.g. "safe" or "avoid"
-    constraint # e.g. hyperrectangle, for now, or list of Constraints
-end
-
 """
 Can use matrix mul to create constraints:
 julia> @constraint(model, con, A * x .== b)
@@ -19,3 +13,9 @@ mutable struct Constraint
     relation::Symbol # <
     scalar::Real # 3.2
 end
+
+# mutable struct Property
+#     temporal # e.g. "always_true" or "eventually_true"
+#     type # e.g. "safe" or "avoid"
+#     constraint # e.g. hyperrectangle, for now, or list of Constraints
+# end
