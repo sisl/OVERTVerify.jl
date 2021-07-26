@@ -9,7 +9,6 @@ using Dates
 using MathOptInterface
 using OVERT
 using OVERT: add_overapproximate
-#using PGFPlots
 
 include("nv/utils/activation.jl")
 include("nv/utils/network.jl")
@@ -259,10 +258,8 @@ function many_timestep_concretization(query::OvertQuery, input_set_0::Hyperrecta
         t1 = Dates.now()
         if timed
 		   output_set, meas_output_set, oA, oA_vars = one_timestep_concretization(query, input_set; t_idx=i, get_meas=true)
-		   #output_set, oA, oA_vars = one_timestep_concretization(query, input_set; t_idx=i)
         else
 		   output_set, meas_output_set, oA, oA_vars = one_timestep_concretization(query, input_set; get_meas=true)
-		   #output_set, oA, oA_vars = one_timestep_concretization(query, input_set)
         end
         t2 = Dates.now()
         println("timestep $i computed in $((t2-t1).value/1000) seconds")
@@ -274,7 +271,6 @@ function many_timestep_concretization(query::OvertQuery, input_set_0::Hyperrecta
     end
 
 	return all_sets, all_meas_sets, all_oA, all_oA_vars
-	#return all_sets, all_oA, all_oA_vars
 end
 
 """
@@ -310,11 +306,9 @@ function setup_mip_with_overt_constraints(query::OvertQuery, input_set::Hyperrec
 
 	# setup all overt constraints via bounds found by conc retization
 	all_sets, all_meas_sets, all_oA, all_oA_vars = many_timestep_concretization(query, input_set; timed=true)
-	#all_sets, all_oA, all_oA_vars = many_timestep_concretization(query, input_set; timed=true)
 	oA_tot = add_overapproximate(all_oA)
 	mip_model = OvertMIP(oA_tot)
-	return mip_model, all_sets, all_meas_sets, all_oA_vars
-	#return mip_model, all_sets, all_oA_vars		
+	return mip_model, all_sets, all_meas_sets, all_oA_vars	
 end
 
 function add_controllers_constraints!(mip_model, query::OvertQuery, all_sets)
@@ -400,7 +394,6 @@ function symbolic_reachability(query::OvertQuery, input_set::Hyperrectangle; get
 	"""
 	# setup all overt cosntraints
 	mip_model, all_sets, all_meas_sets, all_oA_vars = setup_mip_with_overt_constraints(query, input_set)
-	#mip_model, all_sets, all_oA_vars = setup_mip_with_overt_constraints(query, input_set)
 
 	# read neural network and add controller constraints
 	add_controllers_constraints!(mip_model, query, all_sets)
@@ -466,14 +459,12 @@ function symbolic_reachability_with_splitting(query::OvertQuery, input_sets::Arr
 	all_symbolic_meas_sets = []
 	for input_set in input_sets
 		concrete_sets, symbolic_set, concrete_meas_sets, symbolic_meas_set = symbolic_reachability_with_splitting(query, input_set, splits_idx)
-		# concrete_sets,  symbolic_set = symbolic_reachability_with_splitting(query, input_set, splits_idx)
 		push!(all_concrete_sets, concrete_sets)
 		push!(all_symbolic_sets, symbolic_set)
 		push!(all_concrete_meas_sets, concrete_meas_sets)
 		push!(all_symbolic_meas_sets, symbolic_meas_set)
 	end
 	return all_concrete_sets, all_symbolic_sets, all_concrete_meas_sets, all_symbolic_meas_sets
-	#return all_concrete_sets, all_symbolic_sets
 end
 
 function symbolic_reachability_with_splitting(query::OvertQuery, input_set::Hyperrectangle, splits_idx::Array{Int, 1})
@@ -496,14 +487,12 @@ function symbolic_reachability_with_splitting(query::OvertQuery, input_set::Hype
 	all_symbolic_meas_sets = []
 	for this_set in input_sets_splitted
 		concrete_sets, symbolic_set, concrete_meas_sets, symbolic_meas_set = symbolic_reachability(query, this_set, get_meas=true)
-		#concrete_sets, symbolic_set = symbolic_reachability(query, this_set)
 		push!(all_concrete_sets, concrete_sets)
 		push!(all_symbolic_sets, symbolic_set)
 		push!(all_concrete_meas_sets, concrete_meas_sets)
 		push!(all_symbolic_meas_sets, symbolic_meas_set)
 	end
 	return all_concrete_sets, all_symbolic_sets, all_concrete_meas_sets, all_symbolic_meas_sets
-	#return all_concrete_sets, all_symbolic_sets
 end
 
 function symbolic_reachability_with_concretization(query::OvertQuery,
@@ -539,7 +528,6 @@ function symbolic_reachability_with_concretization(query::OvertQuery,
 	for n in concretize_every
 		query.ntime = n
 		concrete_sets, symbolic_set, concrete_meas_sets, symbolic_meas_set = symbolic_reachability(query, this_set, get_meas=true) # pass query and input set
-		# concrete_sets, symbolic_set = symbolic_reachability(query, this_set) # pass query and input set
 		push!(all_concrete_sets, concrete_sets)
 		push!(all_symbolic_sets, symbolic_set)
 		push!(all_concrete_meas_sets, concrete_meas_sets)
@@ -549,7 +537,6 @@ function symbolic_reachability_with_concretization(query::OvertQuery,
 
 	query.ntime = ntime
 	return all_concrete_sets, all_symbolic_sets, all_concrete_meas_sets, all_symbolic_meas_sets
-	# return all_concrete_sets, all_symbolic_sets
 end
 
 function symbolic_reachability_with_concretization_with_splitting(query::OvertQuery,
@@ -713,91 +700,6 @@ function add_output_constraints!(constraint::Constraint, model::JuMP.Model, vars
 
 end
 
-# function symbolic_satisfiability_nth(query::OvertQuery, input_set::Hyperrectangle,
-# 	target_set::Hyperrectangle)
-# 	"""
-# 	This function computes the reachable set after n timestep symbolically.
-# 	inputs:
-# 	- query: OvertQuery
-# 	- input_set: Hyperrectangle for the initial set of states.
-# 	- target_set: Hyperrectangle for the target set of states.
-# 	outputs:
-# 	- status: status of query which can be sat, unsat or error,
-# 	- vals: if sat, returns the counter example at timestep n+1. else returns empty dictionary.
-# 	- stats: if sat, returns the counter example at timestep 1 to n. else returns empty dictionary.
-# 	"""
-# 	vals, stats = Dict(), Dict()
-#
-# 	# setup all overt cosntraints
-#
-# 	mip_model, all_sets, all_oA_vars = setup_mip_with_overt_constraints(query, input_set)
-#
-# 	# read neural network and add controller constraints
-# 	add_controllers_constraints!(mip_model, query, all_sets)
-#
-# 	# mip summary of constaints
-#     mip_summary(mip_model.model)
-#
-# 	# connect outputs of timestep i to inputs of timestep i-1
-# 	match_io!(mip_model, query, all_oA_vars)
-#
-# 	# add feasibility constraints that n+1 timestep intersects target set.
-# 	timestep_nplus1_vars = add_feasibility_constraints!(mip_model, query, all_oA_vars[end], target_set)
-#
-# 	JuMP.optimize!(mip_model.model)
-# 	if termination_status(mip_model.model) == MathOptInterface.OPTIMAL
-# 		# optimal
-# 		status = "sat"
-# 		vals = value.(timestep_nplus1_vars)
-# 		stats = Dict()
-# 		for i = 1:query.ntime
-# 			input_vars_now = [Meta.parse("$(v)_$i") for v in query.problem.input_vars]
-# 			tmp_dict = Dict((v, value(mip_model.vars_dict[v])) for v in input_vars_now)
-# 			stats = merge(stats, tmp_dict)
-# 		end
-# 	elseif termination_status(mip_model.model) == MathOptInterface.INFEASIBLE
-# 		# infeasible
-# 		status = "unsat"
-# 	else
-#   		status = "error"
-# 	end
-# 	return status, vals, stats
-# end
-#
-#
-# function symbolic_satisfiability(query::OvertQuery, input_set::Hyperrectangle, target_set::Hyperrectangle; unsat_problem::Bool=false)
-# 	"""
-# 	Checks whether a property P is satisfied at timesteps 1 to n symbolically.
-# 	inputs:
-# 	- query: OvertQuery
-# 	- input_set: Hyperrectangle for the initial set of variables.
-# 	- target_set: Hyperrectangle for the targe set of variables.
-# 	- unsat_problem: if true, it solves an unsatisfiability problem. i.e. the first
-# 	                timestep at which state does not include in target set.
-# 	outputs:
-# 	- status: status of query which can be sat, unsat or error,
-# 	- vals: if sat, returns the counter example at timestep n+1. else returns empty dictionary.
-# 	- stats: if sat, returns the counter example at timestep 1 to n. else returns empty dictionary.
-# 	"""
-# 	n = query.ntime
-# 	SATus, vals, stats = "", Dict(), Dict() # "init" values...
-# 	problem_type = unsat_problem ? "unsat" : "sat"
-# 	for i = 1:n
-# 		println("checking timestep ", i)
-# 		query.ntime = i
-# 		SATus, vals, stats = symbolic_satisfiability_nth(query, input_set, target_set)
-# 		if SATus == problem_type
-# 			println("Property violated at timestep $i")
-# 			return SATus, vals, stats
-# 	 	elseif SATus == "error"
-# 		 	throw("some error occured at timestep $i")
-# 		end
-#    end
-#    println("Property holds for $n timesteps.")
-#    return SATus, vals, stats
-# end
-
-
 function symbolic_satisfiability_nth(query::OvertQuery, input_set::Hyperrectangle,
 	target_set, all_sets, all_oA, all_oA_vars; threads=0, apply_meas=true)
 	"""
@@ -851,43 +753,6 @@ function symbolic_satisfiability_nth(query::OvertQuery, input_set::Hyperrectangl
 	return status, vals, stats
 end
 
-
-# function symbolic_satisfiability(query::OvertQuery, input_set::Hyperrectangle, target_set::Hyperrectangle; unsat_problem::Bool=false)
-# 	"""
-# 	Checks whether a property P is satisfied at timesteps 1 to n symbolically.
-# 	inputs:
-# 	- query: OvertQuery
-# 	- input_set: Hyperrectangle for the initial set of variables.
-# 	- target_set: Hyperrectangle for the targe set of variables.
-# 	- unsat_problem: if true, it solves an unsatisfiability problem. i.e. the first
-# 	                timestep at which state does not include in target set.
-# 	outputs:
-# 	- status: status of query which can be sat, unsat or error,
-# 	- vals: if sat, returns the counter example at timestep n+1. else returns empty dictionary.
-# 	- stats: if sat, returns the counter example at timestep 1 to n. else returns empty dictionary.
-# 	"""
-# 	n = query.ntime
-# 	SATus, vals, stats = "", Dict(), Dict() # "init" values...
-# 	problem_type = unsat_problem ? "unsat" : "sat"
-#
-# 	all_sets,  all_oA, all_oA_vars = many_timestep_concretization(query, input_set; timed=true)
-#
-# 	for i = 1:n
-# 		println("checking timestep ", i)
-# 		query.ntime = i
-# 		SATus, vals, stats = symbolic_satisfiability_nth(query, input_set, target_set, all_sets[1:i], all_oA[1:i], all_oA_vars[1:i])
-# 		if SATus == problem_type
-# 			println("Property violated at timestep $i")
-# 			return SATus, vals, stats
-# 	 	elseif SATus == "error"
-# 		 	throw("some error occured at timestep $i")
-# 		end
-#    end
-#    println("Property holds for $n timesteps.")
-#    return SATus, vals, stats
-# end
-
-
 function symbolic_satisfiability(query::OvertQuery, input_set::Hyperrectangle, target_set; unsat_problem::Bool=false, after_n::Int=0, return_all=false, threads=0, apply_meas=true)
 	"""
 	Checks whether a property P is satisfied at timesteps 1 to n symbolically.
@@ -923,10 +788,8 @@ function symbolic_satisfiability(query::OvertQuery, input_set::Hyperrectangle, t
 	for i = 1:n
 		println("checking timestep ", i)
 		output_set, meas_set, oA, oA_vars = one_timestep_concretization(query, input_set_tmp; t_idx=i, get_meas=false)
-		#output_set, oA, oA_vars = one_timestep_concretization(query, input_set_tmp; t_idx=i)
 		input_set_tmp = output_set
 		push!(all_sets, output_set)
-		# push!(all_meas_sets, meas_set) # don't need to save measurement sets  for a satisfiability problem
 		push!(all_oA, oA)
 		push!(all_oA_vars, oA_vars)
 
@@ -961,186 +824,6 @@ function symbolic_satisfiability(query::OvertQuery, input_set::Hyperrectangle, t
 end
 
 
-
-
-
-# function symbolic_satisfiability_nth(query, input_set, target_set)
-#    """
-# 	This function computes whether property P is satisfiable at timestep n symbolically.
-#     inputs:
-#     - query: OvertQuery
-# 	- input_set: Hyperrectangle for the initial set of variables.
-# 	- target_set: Hyperrectangle for the targe set of variables.
-#     outputs:
-#     - status (sat, unsat, error), values if sat, statistics
-# 	"""
-# 	# read some attributes
-# 	input_vars = query.problem.input_vars
-# 	control_vars = query.problem.control_vars
-# 	network_file = query.network_file
-# 	ntime = query.ntime
-# 	update_rule = query.problem.update_rule
-# 	dt = query.dt
-#
-# 	# setup all overt constraints via bounds found by conceretization
-# 	all_sets,  all_oA, all_oA_vars = many_timestep_concretization(query, input_set; timed=true)
-# 	oA_tot = add_overapproximate(all_oA)
-# 	mip_model = OvertMIP(oA_tot)
-#
-#     # add controller to mip
-#     for i = 1:ntime
-# 		input_set        = all_sets[i]
-# 		input_vars_tmp   = [Meta.parse("$(v)_$i") for v in input_vars]
-# 		control_vars_tmp = [Meta.parse("$(v)_$i") for v in control_vars]
-# 		mip_control_input_vars  = [get_mip_var(v, mip_model) for v in input_vars_tmp]
-# 		mip_control_output_vars = [get_mip_var(v, mip_model) for v in control_vars_tmp]
-# 		controller_bound = add_controller_constraints(mip_model.model, network_file, input_set, mip_control_input_vars, mip_control_output_vars)
-#     end
-#
-#     mip_summary(mip_model.model)
-#
-#     for i = 1:ntime - 1
-# 		oA_vars_now = all_oA_vars[i]
-# 		input_vars_now = [Meta.parse("$(v)_$i") for v in input_vars]
-# 		input_vars_next= [Meta.parse("$(v)_$(i+1)") for v in input_vars]
-# 		control_vars_now = [Meta.parse("$(v)_$i") for v in control_vars]
-#
-# 		integration_map = update_rule(input_vars_now, control_vars_now, oA_vars_now)
-# 		for j = 1:length(input_vars)
-# 			v = input_vars_now[j]
-# 			dv = integration_map[v]
-# 			next_v = input_vars_next[j]
-#
-# 			v_mip = mip_model.vars_dict[v]
-# 			dv_mip = mip_model.vars_dict[dv]
-# 			next_v_mip = mip_model.vars_dict[next_v]
-#
-# 			@constraint(mip_model.model, next_v_mip == v_mip + dt * dv_mip) # euler integration. we should probably make room for more flexible integration schemes.
-# 		end
-#     end
-#
-# 	# no objective makes it is a feasibility problem
-# 	timestep_nplus1_vars = []
-# 	input_vars_last = [Meta.parse("$(v)_$ntime") for v in input_vars]
-# 	control_vars_last = [Meta.parse("$(v)_$ntime") for v in control_vars]
-# 	oA_vars_last = all_oA_vars[ntime]
-# 	integration_map = update_rule(input_vars_last, control_vars_last, oA_vars_last)
-# 	for (i, v) in enumerate(input_vars_last)
-# 		v_mip = mip_model.vars_dict[v]
-# 		dv = integration_map[v]
-# 		dv_mip = mip_model.vars_dict[dv]
-# 		next_v_mip = v_mip + dt * dv_mip
-# 		push!(timestep_nplus1_vars, next_v_mip)
-# 		v_min = target_set.center[i] - target_set.radius[i]
-# 		v_max = target_set.center[i] + target_set.radius[i]
-# 		@constraint(mip_model.model, next_v_mip >= v_min)
-# 		@constraint(mip_model.model, next_v_mip <= v_max)
-# 	end
-#
-# 	JuMP.optimize!(mip_model.model)
-#
-#
-#
-#
-# 	if termination_status(mip_model.model) == MathOptInterface.OPTIMAL
-# 		# optimal
-# 		vals = value.(timestep_nplus1_vars)
-# 		stats = Dict()
-# 		for i = 1:ntime
-# 			input_vars_now = [Meta.parse("$(v)_$i") for v in input_vars]
-# 			tmp_dict = Dict((v, value(mip_model.vars_dict[v])) for v in input_vars_now)
-# 			stats = merge(stats, tmp_dict)
-# 		end
-#
-# 		return "sat", vals, stats
-# 	elseif termination_status(mip_model.model) == MathOptInterface.INFEASIBLE
-# 		# infeasible
-# 		return "unsat", Dict(), Dict()
-# 	else
-#   		return "error", Dict(), Dict()
-# 	end
-# end
-
-
-# function symbolic_bound(query, input_set)
-#    """
-# 	This function computes the reachable set after n timestep symbolically.
-#    inputs:
-#    - query: OvertQuery
-# 	- input_set: Hyperrectangle for the initial set of variables.
-#    outputs:
-#    - all_sets: an array of hyperrectangle of all reachable sets, starting from the init set
-#                computed with concretization
-#    - all_sets_symbolic: a hyperrectangle for the reachable set at t=n, computed symbolically.
-# 	"""
-# 	# read some attributes
-# 	input_vars = query.problem.input_vars
-# 	control_vars = query.problem.control_vars
-# 	network_file = query.network_file
-# 	ntime = query.ntime
-# 	update_rule = query.problem.update_rule
-# 	dt = query.dt
-#
-# 	# setup all overt constraints via bounds found by conceretization
-# 	all_sets,  all_oA, all_oA_vars = many_timestep_concretization(query, input_set; timed=true)
-# 	oA_tot = add_overapproximate(all_oA)
-# 	mip_model = OvertMIP(oA_tot)
-#
-# 	# add controller to mip
-# 	for i = 1:ntime
-# 		input_set        = all_sets[i]
-# 		input_vars_tmp   = [Meta.parse("$(v)_$i") for v in input_vars]
-# 		control_vars_tmp = [Meta.parse("$(v)_$i") for v in control_vars]
-# 		mip_control_input_vars  = [get_mip_var(v, mip_model) for v in input_vars_tmp]
-# 		mip_control_output_vars = [get_mip_var(v, mip_model) for v in control_vars_tmp]
-# 		controller_bound = add_controller_constraints(mip_model.model, network_file, input_set, mip_control_input_vars, mip_control_output_vars)
-# 	end
-#
-#     mip_summary(mip_model.model)
-#
-# 	# connect outputs of timestep i to inputs of timestep i-1
-# 	for i = 1:ntime - 1
-# 		oA_vars_now = all_oA_vars[i]
-# 		input_vars_now = [Meta.parse("$(v)_$i") for v in input_vars]
-# 		input_vars_next= [Meta.parse("$(v)_$(i+1)") for v in input_vars]
-# 		control_vars_now = [Meta.parse("$(v)_$i") for v in control_vars]
-#
-# 		integration_map = update_rule(input_vars_now, control_vars_now, oA_vars_now)
-# 		for j = 1:length(input_vars)
-# 			v = input_vars_now[j]
-# 			dv = integration_map[v]
-# 			next_v = input_vars_next[j]
-#
-# 			v_mip = mip_model.vars_dict[v]
-# 			dv_mip = mip_model.vars_dict[dv]
-# 			next_v_mip = mip_model.vars_dict[next_v]
-#
-# 			@constraint(mip_model.model, next_v_mip == v_mip + dt * dv_mip)
-#      	end
-#    	end
-#
-# 	# optimize for the output of timestep ntime.
-# 	lows = Array{Float64}(undef, 0)
-# 	highs = Array{Float64}(undef, 0)
-# 	input_vars_last = [Meta.parse("$(v)_$ntime") for v in input_vars]
-# 	control_vars_last = [Meta.parse("$(v)_$ntime") for v in control_vars]
-# 	oA_vars_last = all_oA_vars[ntime]
-# 	integration_map = update_rule(input_vars_last, control_vars_last, oA_vars_last)
-# 	for v in input_vars_last
-# 	   	v_mip = mip_model.vars_dict[v]
-# 		dv = integration_map[v]
-# 		dv_mip = mip_model.vars_dict[dv]
-# 		next_v_mip = v_mip + dt * dv_mip
-# 		@objective(mip_model.model, Min, next_v_mip)
-# 		JuMP.optimize!(mip_model.model)
-# 		push!(lows, objective_value(mip_model.model))
-# 		@objective(mip_model.model, Max, next_v_mip)
-# 		JuMP.optimize!(mip_model.model)
-# 		push!(highs, objective_value(mip_model.model))
-#    	end
-# 	all_sets_symbolic = Hyperrectangle(low=lows, high=highs)
-# 	return all_sets, all_sets_symbolic
-# end
 """
 ----------------------------------------------
 Checking Reachability Queries
