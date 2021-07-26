@@ -1,4 +1,4 @@
-include("compare_to_dreal.jl")
+include("../../../dreal_wrapper/compare_to_dreal.jl")
 include("../../../models/tora/tora.jl")
 
 state_vars = tora_input_vars

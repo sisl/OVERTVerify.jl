@@ -1,10 +1,10 @@
 # run this with: julia1.4 --project="." examples/jmlr/single_pend_feas.jl "small" |& tee examples/jmlr/single_pend_feas_log.txt
 
 include("../../models/problems.jl")
-include("../../MIP/src/overt_to_mip.jl")
-include("../../MIP/src/mip_utils.jl")
+include("../../overt_to_mip.jl")
+include("../../mip_utils.jl")
 include("../../models/single_pendulum/single_pend.jl")
-include("../../MIP/src/overt_parser_minimal.jl")
+include("../../overt_parser_minimal.jl")
 
 controller_type = ARGS[1] # pass from command line, e.g. "small"
 controller = "nnet_files/jair/single_pendulum_$(controller_type)_controller.nnet"

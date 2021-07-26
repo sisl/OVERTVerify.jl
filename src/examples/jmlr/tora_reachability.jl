@@ -1,8 +1,8 @@
 include("../../models/problems.jl")
-include("../../MIP/src/overt_to_mip.jl")
-include("../../MIP/src/mip_utils.jl")
+include("../../overt_to_mip.jl")
+include("../../mip_utils.jl")
 include("../../models/tora/tora.jl")
-include("../../MIP/src/overt_parser_minimal.jl")
+include("../../overt_parser_minimal.jl")
 
 controller_name = ARGS[1] # e.g. "big"
 controller = "nnet_files/jair/tora_$(controller_name)_controller.nnet"

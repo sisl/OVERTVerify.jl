@@ -1,4 +1,4 @@
-include("compare_to_dreal.jl")
+include("../../../dreal_wrapper/compare_to_dreal.jl")
 include("../../../models/single_pendulum/single_pend.jl")
 
 state_vars = [:x1, :x2]
@@ -11,6 +11,6 @@ dt = 0.1
 output_constraints = [:(x1 <= -0.2167)] # (avoid set)
 N_steps=25
 experiment_name = "single_pendulum_small_controller"
-dirname="examples/jmlr/comparisons/"
+dirname="src/examples/jmlr/comparisons/"
 
 ΔT = compare_to_dreal(state_vars, control_vars, input_set, controller_file, dynamics_map, dt, output_constraints, dirname, experiment_name, N_steps; jobs=28, dreal_path="/opt/dreal/4.20.12.1/bin/dreal")

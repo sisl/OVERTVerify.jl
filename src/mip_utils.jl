@@ -11,14 +11,14 @@ using OVERT
 using OVERT: add_overapproximate
 #using PGFPlots
 
-include("../nv/utils/activation.jl")
-include("../nv/utils/network.jl")
-include("../nv/utils/problem.jl")
-include("../nv/utils/util.jl")
-include("../nv/optimization/utils/constraints.jl")
-include("../nv/optimization/utils/objectives.jl")
-include("../nv/optimization/utils/variables.jl")
-include("../nv/reachability/maxSens.jl")
+include("nv/utils/activation.jl")
+include("nv/utils/network.jl")
+include("nv/utils/problem.jl")
+include("nv/utils/util.jl")
+include("nv/optimization/utils/constraints.jl")
+include("nv/optimization/utils/objectives.jl")
+include("nv/optimization/utils/variables.jl")
+include("nv/reachability/maxSens.jl")
 include("logic.jl")
 
 """

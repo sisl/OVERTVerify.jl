@@ -1,11 +1,11 @@
 # acc reachability script
 # ENV["JULIA_DEBUG"] = Main # for debugging
 include("../../models/problems.jl")
-include("../../MIP/src/overt_to_mip.jl")
-include("../../MIP/src/mip_utils.jl")
+include("../../overt_to_mip.jl")
+include("../../mip_utils.jl")
 include("../../models/acc/acc.jl")
-include("../../MIP/src/logic.jl")
-include("../../MIP/src/overt_parser_minimal.jl")
+include("../../logic.jl")
+include("../../overt_parser_minimal.jl")
 using JLD2
 
 controller = "acc_controller"

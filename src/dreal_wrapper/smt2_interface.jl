@@ -3,8 +3,7 @@
 # dynamical system directly
 
 include("../models/problems.jl")
-include("../models/car/car.jl")
-include("../models/car/simple_car.jl")
+
 # using Flux
 # using Flux: Data.DataLoader, Dense, Chain, ADAM, relu
 using Intervals

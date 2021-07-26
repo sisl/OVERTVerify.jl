@@ -1,27 +1,6 @@
 # checking the soundness of overapproximations for the benchmark problems
-
-include("../OverApprox/src/overapprox_nd_relational.jl")
-include("soundness.jl")
-
-# Checking sample problem
-
-function sample1()
-    # sample 1
-    input_vars = [:x]
-    domain = Dict(:x => [-π/4, π/4])
-    # construct overapproximation
-    example_dynamics = :(sin(cos(x)) + 5) 
-    oa = overapprox_nd(example_dynamics, domain, N=-1, ϵ=.1)
-end
-
-function sample2()
-    # sample 2
-    input_vars = [:x, :y]
-    domain = Dict(:x => [-π/4, π/4], :y => [-.1,.1])
-    # construct overapproximation
-    example_dynamics = :(y*sin(x) + 5)  
-    oa = overapprox_nd(example_dynamics, domain, N=-1, ϵ=.1)
-end
+using OVERT
+include("smt2_interface.jl")
 
 ##################### MODE 3: BUILD UP PROOFS OF EACH LEVEL OF THE APPROX
 

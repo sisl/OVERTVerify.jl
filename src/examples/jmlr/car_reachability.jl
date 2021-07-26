@@ -1,8 +1,8 @@
 include("../../models/problems.jl")
-include("../../MIP/src/overt_to_mip.jl")
-include("../../MIP/src/mip_utils.jl")
+include("../../overt_to_mip.jl")
+include("../../mip_utils.jl")
 include("../../models/car/simple_car.jl")
-include("../../MIP/src/overt_parser_minimal.jl")
+include("../../overt_parser_minimal.jl")
 using JLD2
 using LazySets
 #ENV["JULIA_DEBUG"] = Main

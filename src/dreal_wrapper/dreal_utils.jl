@@ -1,4 +1,10 @@
-using NeuralVerification: ReLU, Id, Network, Layer
+#using NeuralVerification: ReLU, Id, Network, Layer
+using OVERT: symbols, expand
+using SymEngine
+include("../nv/utils/activation.jl")
+include("../nv/utils/network.jl")
+include("../nv/utils/problem.jl")
+include("../nv/utils/util.jl")
 
 # helper functions for the conversion to smt2
 act_dict = Dict(ReLU()=> :relu)
@@ -164,7 +170,7 @@ function run_dreal(full_fname::String; δ=0.001, jobs=1, dreal_path="/opt/dreal/
     return occursin("unsat", result) 
 end
 
-function add_output_constraints_and_check_property(formula::SMTLibFormula, output_constraints::Array{Expr}, x::Array{Symbol}, t::T where T<:Real; δ=0.001, jobs=1, dreal_path="/opt/dreal/4.21.06.1/bin/dreal", experiment_name="dreal_test")
+function add_output_constraints_and_check_property(formula::SMTLibFormula, output_constraints::Array{Expr}, x::Array{Symbol}, t::T where T<:Real; δ=0.001, jobs=1, dreal_path="/opt/dreal/4.21.06.1/bin/dreal", experiment_name="dreal_test", dirname="examples/jmlr/comparisons/smtlibfiles/")
     unsat = true
     # add output constraints 
     ## create a separate file for each output constraint
@@ -174,7 +180,7 @@ function add_output_constraints_and_check_property(formula::SMTLibFormula, outpu
         add_output_constraints!(formula_i, c, x, t)
         # write to file 
         formula_i = gen_full_formula(formula_i::SMTLibFormula)
-        full_fname = write_to_file(formula_i::SMTLibFormula, experiment_name*"_constraint$(i)_time$t.smt2"; dirname="examples/jmlr/comparisons/smtlibfiles/")
+        full_fname = write_to_file(formula_i::SMTLibFormula, experiment_name*"_constraint$(i)_time$t.smt2"; dirname=dirname*"smtlibfiles/")
         # call dreal on file
         t_dreal_start = time()
         unsat &= run_dreal(full_fname; δ=δ, jobs=jobs, dreal_path=dreal_path)
