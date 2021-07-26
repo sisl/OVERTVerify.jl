@@ -8,7 +8,6 @@ Keyword argument `last_layer_activation` sets the activation of the last
 layer, and defaults to `Id()`, (i.e. a linear output layer).
 """
 function read_nnet(fname::String; last_layer_activation = Id())
-    println("PWD is: ",pwd())
     f = open(fname)
     line = readline(f)
     while occursin("//", line) #skip comments

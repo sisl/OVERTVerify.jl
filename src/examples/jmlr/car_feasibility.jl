@@ -28,7 +28,7 @@ function run_query(query_number, avoid_set, controller_name; threads=0)
 	dt = (t2-t1)
 	println("dt is $dt")
 
-	JLD2.@save "examples/jmlr/data/car_satisfiability_"*string(controller_name)*"_controller_data_q"*string(query_number)*".jld2" query input_set avoid_set SATii valii statii dt
+	JLD2.@save "src/examples/jmlr/data/car_satisfiability_"*string(controller_name)*"_controller_data_q"*string(query_number)*".jld2" query input_set avoid_set SATii valii statii dt
 
 	println("satii after save is: ", SATii)
 	return SATii
@@ -77,7 +77,7 @@ function run_car_satisfiability(; controller_name="smallest", threads=0)
 		println("The property does not hold.")
 	end
 
-	JLD2.@save "examples/jmlr/data/car_satisfiability_"*string(controller_name)*"_controller_data_final_result.jld2" SAT timesteps_where_properties_hold
+	JLD2.@save "src/examples/jmlr/data/car_satisfiability_"*string(controller_name)*"_controller_data_final_result.jld2" SAT timesteps_where_properties_hold
 end
 
 # 0 threads means "let gurobi decide how many threads it wants"

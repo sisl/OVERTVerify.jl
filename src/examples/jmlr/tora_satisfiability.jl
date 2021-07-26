@@ -29,7 +29,7 @@ function run_query(query_number, avoid_set, controller_name)
 	dt = (t2-t1)
 	println("dt is $dt")
 
-	JLD2.@save "examples/jmlr/data/tora_satisfiability_"*string(controller_name)*"_controller_data_q"*string(query_number)*".jld2" query input_set avoid_set SATus vals stats dt query_number controller_name
+	JLD2.@save "src/examples/jmlr/data/tora_satisfiability_"*string(controller_name)*"_controller_data_q"*string(query_number)*".jld2" query input_set avoid_set SATus vals stats dt query_number controller_name
 
 	return SATus
 end
@@ -45,7 +45,7 @@ function run_tora_satisfiability(;controller_name="smallest")
 		avoid_set2 =  HalfSpace([-1., 0., 0., 0.], -2.)# checks if x1 >= 2
 		SATus2 = run_query(2, avoid_set2, controller_name)
 
-		open("examples/jmlr/data/tora_satisfiability_"*string(controller_name)*".txt", "w") do io
+		open("src/examples/jmlr/data/tora_satisfiability_"*string(controller_name)*".txt", "w") do io
 			write(io, "SATus1 = $SATus1 \n SATus2 = $SATus2")
 		end;
 	end
