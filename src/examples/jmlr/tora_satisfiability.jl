@@ -6,7 +6,7 @@ include("../../overt_parser_minimal.jl")
 using JLD2
 
 function run_query(query_number, avoid_set, controller_name)
-	controller = "nnet_files/jair/tora_"*controller_name*"_controller.nnet"
+	controller = "nnet_files/jmlr/tora_"*controller_name*"_controller.nnet"
 
 	println("Controller: ", controller_name)
 

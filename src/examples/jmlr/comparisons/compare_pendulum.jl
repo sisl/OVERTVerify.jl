@@ -4,7 +4,7 @@ include("../../../models/single_pendulum/single_pend.jl")
 state_vars = [:x1, :x2]
 control_vars = [:u1]
 input_set = Dict(:x1=>[1., 1.2], :x2=>[0., 0.2])
-controller_file = "nnet_files/jair/single_pendulum_small_controller.nnet"
+controller_file = "nnet_files/jmlr/single_pendulum_small_controller.nnet"
 dynamics_map = Dict(single_pend_input_vars[1]=>single_pend_input_vars[2],
                     single_pend_input_vars[2]=>single_pend_θ_doubledot)
 dt = 0.1

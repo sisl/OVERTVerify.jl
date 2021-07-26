@@ -7,7 +7,7 @@ using JLD2
 using LazySets
 
 function run_query(query_number, avoid_set, controller_name; threads=0)
-	controller = "nnet_files/jair/car_"*controller_name*"_controller.nnet"
+	controller = "nnet_files/jmlr/car_"*controller_name*"_controller.nnet"
 	println("Controller is: ", controller)
 
 	query = OvertQuery(

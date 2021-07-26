@@ -5,7 +5,7 @@ include("../../models/tora/tora.jl")
 include("../../overt_parser_minimal.jl")
 
 controller_name = ARGS[1] # e.g. "big"
-controller = "nnet_files/jair/tora_$(controller_name)_controller.nnet"
+controller = "nnet_files/jmlr/tora_$(controller_name)_controller.nnet"
 println("controller is: $controller")
 
 query = OvertQuery(

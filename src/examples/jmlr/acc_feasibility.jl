@@ -10,7 +10,7 @@ using JLD2
 # ACC CONTROLLER
 # 3x20 controller here: https://github.com/souradeep-111/sherlock/tree/master/systems_with_networks/ARCH_2019/ACC
 controller = "acc_controller"
-controller_filepath = "nnet_files/jair/"*controller*".nnet"
+controller_filepath = "nnet_files/jmlr/"*controller*".nnet"
 println("Controller is: ", controller)
 query = OvertQuery(
     ACC,  # problem

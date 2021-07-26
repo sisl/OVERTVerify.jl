@@ -7,7 +7,7 @@ include("../../models/single_pendulum/single_pend.jl")
 include("../../overt_parser_minimal.jl")
 
 controller_type = ARGS[1] # pass from command line, e.g. "small"
-controller = "nnet_files/jair/single_pendulum_$(controller_type)_controller.nnet"
+controller = "nnet_files/jmlr/single_pendulum_$(controller_type)_controller.nnet"
 println("Controller: ", controller)
 query = OvertQuery(
 	SinglePendulum,    # problem
