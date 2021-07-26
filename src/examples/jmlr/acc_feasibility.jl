@@ -1,10 +1,7 @@
 # acc satisfiability script
-include("../../models/problems.jl")
-include("../../overt_to_mip.jl")
-include("../../reachability_functions.jl")
-include("../../models/acc/acc.jl")
-include("../../logic.jl")
-include("../../overt_parser_minimal.jl")
+using OVERTVerify
+using LazySets
+using Dates
 using JLD2
 
 # ACC CONTROLLER

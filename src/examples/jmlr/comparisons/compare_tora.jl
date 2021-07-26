@@ -1,5 +1,4 @@
-include("../../../dreal_wrapper/compare_to_dreal.jl")
-include("../../../models/tora/tora.jl")
+using OVERTVerify
 
 state_vars = tora_input_vars
 control_vars = tora_control_vars

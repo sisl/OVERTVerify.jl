@@ -1,10 +1,7 @@
-include("../../models/problems.jl")
-include("../../overt_to_mip.jl")
-include("../../reachability_functions.jl")
-include("../../models/car/simple_car.jl")
-include("../../overt_parser_minimal.jl")
-using JLD2
+using OVERTVerify
 using LazySets
+using Dates
+using JLD2
 #ENV["JULIA_DEBUG"] = Main
 
 controller_name = ARGS[1]

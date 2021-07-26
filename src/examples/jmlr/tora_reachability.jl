@@ -1,8 +1,6 @@
-include("../../models/problems.jl")
-include("../../overt_to_mip.jl")
-include("../../reachability_functions.jl")
-include("../../models/tora/tora.jl")
-include("../../overt_parser_minimal.jl")
+using OVERTVerify
+using LazySets
+using Dates
 
 controller_name = ARGS[1] # e.g. "big"
 controller = "nnet_files/jmlr/tora_$(controller_name)_controller.nnet"

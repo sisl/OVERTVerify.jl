@@ -1,11 +1,8 @@
-# run this with: julia1.4 --project="." examples/jmlr/single_pend_feas.jl "small" |& tee examples/jmlr/single_pend_feas_log.txt
+# run this with: julia1.5 --project="." examples/jmlr/single_pend_feas.jl "small" |& tee examples/jmlr/single_pend_feas_log.txt
 
-# include("../../models/problems.jl")
-# include("../../overt_to_mip.jl")
-# include("../../reachability_functions.jl")
-# include("../../models/single_pendulum/single_pend.jl")
-# include("../../overt_parser_minimal.jl")
 using OVERTVerify
+using LazySets
+using Dates
 
 controller_type = ARGS[1] # pass from command line, e.g. "small"
 controller = "nnet_files/jmlr/single_pendulum_$(controller_type)_controller.nnet"

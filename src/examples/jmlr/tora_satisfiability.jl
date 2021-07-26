@@ -1,8 +1,6 @@
-include("../../models/problems.jl")
-include("../../overt_to_mip.jl")
-include("../../reachability_functions.jl")
-include("../../models/tora/tora.jl")
-include("../../overt_parser_minimal.jl")
+using OVERTVerify
+using LazySets
+using Dates
 using JLD2
 
 function run_query(query_number, avoid_set, controller_name)

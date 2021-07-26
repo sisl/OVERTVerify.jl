@@ -2,7 +2,6 @@
 # to the unsoundness of fitting a neural network to represent the 
 # dynamical system directly
 
-#include("../models/problems.jl")
 
 # using Flux
 # using Flux: Data.DataLoader, Dense, Chain, ADAM, relu

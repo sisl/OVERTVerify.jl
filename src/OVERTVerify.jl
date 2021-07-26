@@ -25,6 +25,9 @@ include("dreal_wrapper/compare_to_dreal.jl")
 
 export OvertQuery,
     SinglePendulum,
+    ACC,
+    SimpleCar,
+    Tora,
     symbolic_satisfiability,
     symbolic_reachability_with_concretization,
     clean_up_sets,
