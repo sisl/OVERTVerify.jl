@@ -1,10 +1,10 @@
 #using NeuralVerification: ReLU, Id, Network, Layer
 using OVERT: symbols, expand
 using SymEngine
-include("../nv/utils/activation.jl")
-include("../nv/utils/network.jl")
-include("../nv/utils/problem.jl")
-include("../nv/utils/util.jl")
+# include("../nv/utils/activation.jl")
+# include("../nv/utils/network.jl")
+# include("../nv/utils/problem.jl")
+# include("../nv/utils/util.jl")
 
 # helper functions for the conversion to smt2
 act_dict = Dict(ReLU()=> :relu)

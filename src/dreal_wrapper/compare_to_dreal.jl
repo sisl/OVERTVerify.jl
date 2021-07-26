@@ -1,5 +1,4 @@
-include("proof_functions.jl")
-include("dreal_utils.jl")
+
 using LazySets
 
 function compare_to_dreal(state_vars::Array{Symbol}, control_vars::Array{Symbol}, input_set::Dict, controller_file::String, dynamics_map::Dict, dt::T where T<:Real, output_constraints::Array{Expr}, dirname::String, experiment_name::String, N_steps::T where T<:Real; jobs=1, dreal_path="/opt/dreal/4.21.06.1/bin/dreal")

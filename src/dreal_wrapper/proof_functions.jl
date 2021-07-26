@@ -1,6 +1,6 @@
 # checking the soundness of overapproximations for the benchmark problems
 using OVERT
-include("smt2_interface.jl")
+#include("smt2_interface.jl")
 
 ##################### MODE 3: BUILD UP PROOFS OF EACH LEVEL OF THE APPROX
 
