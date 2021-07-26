@@ -1,3 +1,4 @@
+using Parameters
 """
     MaxSens(resolution::Float64, tight::Bool)
 
