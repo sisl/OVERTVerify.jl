@@ -16,7 +16,7 @@ dt = 0.1
 output_constraints = [:(x1 <= -2.0), :(x1 >= 2.0)] # (avoid set)
 N_steps=15
 experiment_name = "tora_smallest_controller"
-dirname="examples/jmlr/comparisons/"
+dirname="src/examples/jmlr/comparisons/"
 
 ΔT = compare_to_dreal(state_vars, control_vars, input_dict, controller_file, dynamics_map, dt, output_constraints, dirname, experiment_name, N_steps; jobs=28, dreal_path="/opt/dreal/4.20.12.1/bin/dreal")
 
