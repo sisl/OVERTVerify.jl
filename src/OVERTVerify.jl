@@ -3,6 +3,8 @@ module OVERTVerify
 # include stuff
 include("models/problems.jl")
 include("overt_to_mip.jl")
+
+## The following code in the nv folder forked from https://github.com/sisl/NeuralVerification.jl
 include("nv/utils/activation.jl")
 include("nv/utils/network.jl")
 include("nv/utils/problem.jl")
@@ -11,6 +13,8 @@ include("nv/optimization/utils/constraints.jl")
 include("nv/optimization/utils/objectives.jl")
 include("nv/optimization/utils/variables.jl")
 include("nv/reachability/maxSens.jl")
+## 
+
 include("logic.jl")
 include("reachability_functions.jl")
 include("models/single_pendulum/single_pend.jl")
