@@ -10,6 +10,6 @@ Reachability queries can be solved either using a feasibility approach or by exp
 
 Examples of reachable set computation and feasibility problems are setup in the `src/examples` folder. Below you can find instructions for
  - [setting up a new model](setup_model.md)
- - [define a new control policy](define_controller.md)
+ - [define a new control policy](define_control_policy.md)
  - [reachable set computation problem specification](reachability.md)
  - [feasibility problem specification](feasibility.md)
