@@ -38,6 +38,7 @@ export OvertQuery,
     check_avoid_set_intersection,
     compare_to_dreal,
     Id,
-    ReLU
+    ReLU,
+    Constraint
         # stuff
 end

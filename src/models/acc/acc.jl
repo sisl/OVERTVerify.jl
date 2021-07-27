@@ -66,7 +66,6 @@ ACC = OvertProblem(
 	acc_update_rule,
 	acc_input_vars,
 	acc_control_vars,
-#)
  	acc_measurement_model
  )
 
