@@ -1,4 +1,4 @@
-## Define controller
+## Define a Control Policy
 The next step is to define the neural network control policy. 
 Currently, OVERTVerify supports
 fully connected neural networks with ReLU activation functions. 
