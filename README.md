@@ -14,3 +14,20 @@ This system is unrolled in time and used to answer bounded-time reachability que
 
 ## Usage
 See the accompanied documentation [here](docs/src/index.md)
+
+
+## References
+
+- [1] "*OVERT: An Algorithm for Safety Verification of Neural Network Control Policies for Nonlinear Systems*", Sidrane et al. (2020) [link](https://arxiv.org/abs/2108.01220)
+
+### Citation
+```
+@misc{sidrane2021overt,
+      title={OVERT: An Algorithm for Safety Verification of Neural Network Control Policies for Nonlinear Systems}, 
+      author={Chelsea Sidrane and Amir Maleki and Ahmed Irfan and Mykel J. Kochenderfer},
+      year={2021},
+      eprint={2108.01220},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
