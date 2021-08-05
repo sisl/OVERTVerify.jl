@@ -1,6 +1,6 @@
 using JuMP
 using MathProgBase.SolverInterface
-using GLPK
+#using GLPK
 using LazySets
 using Parameters
 using Interpolations

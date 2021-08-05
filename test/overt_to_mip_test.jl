@@ -1,6 +1,6 @@
-include("OverApprox/src/overapprox_nd_relational.jl")
-include("OverApprox/src/overt_parser.jl")
-include("MIP/src/overt_to_mip.jl")
+using OVERT
+include("../src/overt_parser_minimal.jl")
+include("../src/overt_to_mip.jl")
 
 function overt_2_mip_test1()
     oA_test = OverApproximation()
