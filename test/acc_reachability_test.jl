@@ -8,7 +8,7 @@ using JLD2
 using Test
 
 controller = "acc_controller"
-controller_filepath = "nnet_files/jmlr/"*controller*".nnet"
+controller_filepath = "../nnet_files/jmlr/"*controller*".nnet"
 println("Controller is: ", controller)
 query = OvertQuery(
     ACC,  # problem

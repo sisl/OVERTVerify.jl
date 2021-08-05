@@ -47,6 +47,6 @@ SATus, vals, stats = symbolic_satisfiability(query, input_set, output_constraint
 t2 = Dates.time()
 dt = t2 - t1
 
-@test SATus == false
+@test SATus == "unsat"
 
 println("acc feasibility test passed")
