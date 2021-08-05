@@ -6,6 +6,12 @@ Such an overapproximation is used for converting smooth nonlinear functions that
 The overapproximated dynamics, together with the neural network control policy (which is assumed to be ReLU-activated) is then represented as a mixed integer program using an encoding inspired by the [MIPVerify algorithm](https://arxiv.org/abs/1711.07356).
 This system is unrolled in time and used to answer bounded-time reachability queries such as: can the closed loop system avoid an unsafe set? Or reach a goal set?
 
+## Dependencies
+Gurobi is required. An academic license can be acquired for free here: 
+https://www.gurobi.com/academia/academic-program-and-licenses/
+
+The Julia dependencies are listed in the Project.toml file.
+
 ## Installation
 ```
 ] add https://github.com/sisl/OVERT.jl
