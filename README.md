@@ -10,7 +10,7 @@ This system is unrolled in time and used to answer bounded-time reachability que
 Gurobi is required. An academic license can be acquired for free here: 
 https://www.gurobi.com/academia/academic-program-and-licenses/
 
-The Julia dependencies are listed in the Project.toml file.
+The Julia dependencies are listed in the Project.toml file and will be automatically installed when you add the package (see Installation below).
 
 ## Installation
 ```
