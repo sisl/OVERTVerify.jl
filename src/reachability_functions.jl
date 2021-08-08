@@ -1,10 +1,10 @@
 using JuMP
 using MathProgBase.SolverInterface
-#using GLPK
+using GLPK
 using LazySets
 using Parameters
 using Interpolations
-using Gurobi
+# using Gurobi
 using Dates
 using MathOptInterface
 using OVERT
