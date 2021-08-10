@@ -36,8 +36,9 @@ using JLD2
 
     concretization_intervals = [2, 2]
 
-    # TODO: fix this (right now it takes too long to run for CI)
-    if false
+    if solver_name(_defaultmodel()) == "GLPK"
+        @warn "Skipping reachability test because GLPK is slow; try testing with Gurobi installed"
+    else
         t1 = Dates.time()
         concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals)
         t2 = Dates.time()

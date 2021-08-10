@@ -18,17 +18,21 @@ mutable struct OvertMIP
     overt_app::OverApproximation  # overt OverApproximation object
     model::JuMP.Model             # a JuMP model for MIP
     vars_dict::Dict{Symbol, JuMP.VariableRef}  # dictionary of Overt symbols and their associated variable in mip
-    solver::String                # solver, default is GLPK
+end
+
+function _defaultmodel(threads=0)
+    # using Gurobi
+    # return Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))
+    model = Model(GLPK.Optimizer)
+    set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
+    return model
 end
 
 # default constructor
-function OvertMIP(overt_app::OverApproximation; threads=0)
-    model = Model(GLPK.Optimizer)
-    set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
+function OvertMIP(overt_app::OverApproximation; threads=0, model=_defaultmodel(threads))
     overt_mip_model = OvertMIP(overt_app,
                          model,
-                         Dict{Symbol, JuMP.VariableRef}(),
-                         "GLPK")
+                         Dict{Symbol, JuMP.VariableRef}())
     overt_2_mip(overt_mip_model)
     return overt_mip_model
 end

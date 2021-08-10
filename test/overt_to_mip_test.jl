@@ -1,4 +1,5 @@
 using OVERT
+using OVERTVerify
 include("../src/overt_parser_minimal.jl")
 include("../src/overt_to_mip.jl")
  
@@ -12,7 +13,6 @@ include("../src/overt_to_mip.jl")
        l, u = oA_test.ranges[x]
        @test l <= value(x_var)
        @test u >= value(x_var)
-       #println("$x = $(value(x_var)) lies within range ($l, $u)")
     end
 
     @objective(overt_mip_model.model, Min, overt_mip_model.vars_dict[:x2])
@@ -42,7 +42,6 @@ end
        l, u = oA_test.ranges[x]
        @test l <= value(x_var)
        @test u >= value(x_var)
-       #println("$x = $(value(x_var)) lies within range ($l, $u)")
     end
 
     @objective(overt_mip_model.model, Min, overt_mip_model.vars_dict[:x2])
@@ -72,7 +71,6 @@ end
        l, u = oA_test.ranges[x]
        @test l <= value(x_var)
        @test u >= value(x_var)
-       #println("$x = $(value(x_var)) lies within range ($l, $u)")
     end
 
     @objective(overt_mip_model.model, Min, overt_mip_model.vars_dict[:x3])
