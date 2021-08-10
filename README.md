@@ -10,7 +10,7 @@ The overapproximated dynamics, together with the neural network control policy (
 This system is unrolled in time and used to answer bounded-time reachability queries such as: can the closed loop system avoid an unsafe set? Or reach a goal set?
 
 ## Dependencies
-By default, this package will use GLPK. However, Gurobi tends to perform better. An academic license can be acquired for free here: 
+By default, this package will use GLPK as it is open-source. However, Gurobi tends to perform better and was used for the experiments in the paper. If you have or can obtain a Gurobi license, it is recommended to use Gurobi. An academic Gurobi license can be acquired for free here: 
 https://www.gurobi.com/academia/academic-program-and-licenses/
 
 The Julia dependencies are listed in the Project.toml file and will be automatically installed when you add the package (see Installation below).
