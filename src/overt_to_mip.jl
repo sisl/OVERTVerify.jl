@@ -185,6 +185,8 @@ end
 
 """ parse expr like y == max(0, x) """
 function max_alone_2_mip(expr::Expr, outvar::JuMP.VariableRef, overt_mip_model::OvertMIP)
+    @assert expr.args[1] == :max 
+    @assert expr.args[2] == 0.0
     var, coef, scalar = get_linear_coeffs(expr.args[3])
     var, coef = var[1], coef[1]
     l, u = overt_mip_model.overt_app.ranges[var]
