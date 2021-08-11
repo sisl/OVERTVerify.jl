@@ -19,48 +19,48 @@ function car_dynamics_overt(range_dict::Dict{Symbol, Array{T, 1}} where {T <: Re
 
 	if isnothing(t_idx)
 		v1 = :(atan($(lr / (lr + lf)) * tan(u2)))
-	    v1_oA = overapprox_nd(v1, range_dict; N=N_OVERT)
+	    v1_oA = overapprox(v1, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v1_oA.output => v1_oA.output_range))
 
 	    v2 = :($(v1_oA.output) + x3)
-	    v2_oA = overapprox_nd(v2, range_dict; N=N_OVERT)
+	    v2_oA = overapprox(v2, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v2_oA.output => v2_oA.output_range))
 
 	    v3 = :(x4 * cos($(v2_oA.output)))
-	    v3_oA = overapprox_nd(v3, range_dict; N=N_OVERT)
+	    v3_oA = overapprox(v3, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v3_oA.output=> v3_oA.output_range))
 
 	    v4 = :(x4 * sin($(v2_oA.output)))
-	    v4_oA = overapprox_nd(v4, range_dict; N=N_OVERT)
+	    v4_oA = overapprox(v4, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v4_oA.output=> v4_oA.output_range))
 
 	    v5 = :($(1 / lr) * x4 * sin($(v1_oA.output)))
-	    v5_oA = overapprox_nd(v5, range_dict; N=N_OVERT)
+	    v5_oA = overapprox(v5, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v5_oA.output=> v5_oA.output_range))
 	else
     	v1 = "atan($(lr / (lr + lf)) * tan(u2_$t_idx))"
 		v1 = Meta.parse(v1)
-	    v1_oA = overapprox_nd(v1, range_dict; N=N_OVERT)
+	    v1_oA = overapprox(v1, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v1_oA.output => v1_oA.output_range))
 
 	    v2 = "$(v1_oA.output) + x3_$t_idx"
 		v2 = Meta.parse(v2)
-	    v2_oA = overapprox_nd(v2, range_dict; N=N_OVERT)
+	    v2_oA = overapprox(v2, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v2_oA.output => v2_oA.output_range))
 
 	    v3 = "x4_$t_idx * cos($(v2_oA.output))"
 		v3 = Meta.parse(v3)
-	    v3_oA = overapprox_nd(v3, range_dict; N=N_OVERT)
+	    v3_oA = overapprox(v3, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v3_oA.output=> v3_oA.output_range))
 
 	    v4 = "x4_$t_idx * sin($(v2_oA.output))"
 		v4 = Meta.parse(v4)
-	    v4_oA = overapprox_nd(v4, range_dict; N=N_OVERT)
+	    v4_oA = overapprox(v4, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v4_oA.output=> v4_oA.output_range))
 
 	    v5 = "$(1 / lr) * x4_$t_idx * sin($(v1_oA.output))"
 		v5 = Meta.parse(v5)
-	    v5_oA = overapprox_nd(v5, range_dict; N=N_OVERT)
+	    v5_oA = overapprox(v5, range_dict; N=N_OVERT)
 	    range_dict = merge(range_dict, Dict(v5_oA.output=> v5_oA.output_range))
 	end
     oA_out = add_overapproximate([v1_oA, v2_oA, v3_oA, v4_oA, v5_oA])

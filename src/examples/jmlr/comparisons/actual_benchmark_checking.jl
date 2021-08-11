@@ -17,7 +17,7 @@ function sincos(ϵ, δ; N=-1)
     dyn = :(sin(cos(x)))
     x = [0, π]
     domain = Dict(zip([:x], [x]))
-    oa = overapprox_nd(dyn, domain, N=N, ϵ=ϵ)
+    oa = overapprox(dyn, domain, N=N, ϵ=ϵ)
     t = time()
     result = check_overapprox(oa, domain, [:x], "sincosexample", jobs=2, delta_sat=δ)
     Δt = time() - t
@@ -29,7 +29,7 @@ function sincosysq(ϵ, δ; N=-1, jobs=4)
     x_domain = [0, π]
     y_domain = [-0.25, 1]
     domain = Dict(zip([:x, :y], [x_domain, y_domain]))
-    oa = overapprox_nd(dyn, domain, N=N, ϵ=ϵ)
+    oa = overapprox(dyn, domain, N=N, ϵ=ϵ)
     t = time()
     result = check_overapprox(oa, domain, [:x, :y], "sincos_ysq_example", jobs=jobs, delta_sat=δ)
     Δt = time() - t
@@ -51,7 +51,7 @@ function xy(ϵ, δ; N=-1, jobs=2)
     x = [-1.5, -1.4] # x = [-1.5, 3.5]
     y = [-0.738, -0.6663] # y = [-1.2, 2.2]
     domain = Dict(zip([:x, :y], [x, y]))
-    oa = overapprox_nd(dyn, domain, N=N, ϵ=ϵ)
+    oa = overapprox(dyn, domain, N=N, ϵ=ϵ)
     t = time()
     result = check_overapprox(oa, domain, [:x, :y], "xy_example", jobs=jobs, delta_sat=δ)
     Δt = time() - t
@@ -64,7 +64,7 @@ function xy_SAT(ϵ, δ; N=-1, jobs=2)
     x = [-1.5, -1.4] # x = [-1.5, 3.5]
     y = [-0.738, -0.6663] # y = [-1.2, 2.2]
     domain = Dict(zip([:x, :y], [x, y]))
-    oa = overapprox_nd(dyn, domain, N=N, ϵ=-ϵ) # < note how I am NEGATING ϵ
+    oa = overapprox(dyn, domain, N=N, ϵ=-ϵ) # < note how I am NEGATING ϵ
     t = time()
     result = check_overapprox(oa, domain, [:x, :y], "xy_SAT_example", jobs=jobs, delta_sat=δ)
     Δt = time() - t
@@ -97,7 +97,7 @@ function check_xy_whole(ϵ, δ; N=-1, jobs=56)
     x_range = [-1.5, -1.4] # x = [-1.5, 3.5]
     y_range = [-0.738, -0.6663] # y = [-1.2, 2.2]
     domain = Dict(zip([:x, :y], [x_range, y_range]))
-    oa = overapprox_nd(expr, domain, N=N, ϵ=ϵ) 
+    oa = overapprox(expr, domain, N=N, ϵ=ϵ) 
 
     ϕ = [:($(oa.output) == $expr)]
     ####
@@ -131,7 +131,7 @@ function xcosy(ϵ, δ; N=-1, jobs=56)
     x = [-1., 1.] #[-1.5, -1.4]
     y = [2., 3.0]#[2.3, 2.4]
     domain = Dict(zip([:x, :y], [x, y]))
-    oa = overapprox_nd(dyn, domain, N=N, ϵ=ϵ)
+    oa = overapprox(dyn, domain, N=N, ϵ=ϵ)
     t = time()
     result = check_overapprox(oa, domain, [:x, :y], "xcosy_example", jobs=jobs, delta_sat=δ)
     Δt = time() - t
@@ -155,8 +155,8 @@ function acc(ϵ, δ; jobs=4)
     domain = Dict(zip(acc_input_vars, input_domains))
     domain[acc_control_vars[1]] = [low(bounds)..., high(bounds)...] 
     # construct overapproximation   
-    oa_dim3 = overapprox_nd(acc_ẋ₃, domain, N=-1, ϵ=ϵ)
-    oa_dim6 = overapprox_nd(acc_ẋ₆, domain, N=-1, ϵ=ϵ)
+    oa_dim3 = overapprox(acc_ẋ₃, domain, N=-1, ϵ=ϵ)
+    oa_dim6 = overapprox(acc_ẋ₆, domain, N=-1, ϵ=ϵ)
 
     println("Using $jobs jobs")
     result_dim3 = check_overapprox(oa_dim3, domain, [acc_input_vars..., acc_control_vars...], "acc_dim3", jobs=jobs, delta_sat=δ)
@@ -179,8 +179,8 @@ function simple_car(ϵ, δ; N=-1, jobs=4)
     domain[simple_car_control_vars[1]] = [low(c_bounds)[1]..., high(c_bounds)[1]...]  # u is 2d
     domain[simple_car_control_vars[2]] = [low(c_bounds)[2]..., high(c_bounds)[2]...]  # u is 2d
 
-    oa_dim1 = overapprox_nd(simple_car_ẋ, domain, N=N, ϵ=ϵ)
-    oa_dim2 = overapprox_nd(simple_car_ẏ, domain, N=N, ϵ=ϵ)
+    oa_dim1 = overapprox(simple_car_ẋ, domain, N=N, ϵ=ϵ)
+    oa_dim2 = overapprox(simple_car_ẏ, domain, N=N, ϵ=ϵ)
 
     result_dim1 = check_overapprox(oa_dim1, domain, [simple_car_input_vars..., simple_car_control_vars...], "simple_car_dim1", jobs=56, delta_sat=δ)
     println("Finished checking dim 1")
@@ -198,7 +198,7 @@ function single_pendulum(ϵ, δ; jobs=4)
     bounds = find_controller_bound(file_dir*"/../nnet_files/jair/single_pendulum_small_controller.nnet", input_set, Id()) # returns 1D
     domain = Dict(zip(single_pend_input_vars, input_domains))
     domain[single_pend_control_vars[1]] = [low(bounds)..., high(bounds)...]  # u is 1d
-    oa = overapprox_nd(single_pend_θ_doubledot, domain, N=-1, ϵ=ϵ)
+    oa = overapprox(single_pend_θ_doubledot, domain, N=-1, ϵ=ϵ)
 
     println("Using $jobs jobs")
     result = check_overapprox(oa, domain, [single_pend_input_vars..., single_pend_control_vars...], "single_pend", jobs=jobs, delta_sat=δ)
@@ -217,7 +217,7 @@ function tora(ϵ, δ; jobs=4)
     bounds = find_controller_bound(file_dir*"/../nnet_files/jair/tora_smallest_controller.nnet", input_set, Id()) # returns 1D
     domain = Dict(zip(tora_input_vars, input_domains))
     domain[tora_control_vars[1]] = [low(bounds)..., high(bounds)...]  # u is 1d
-    oa = overapprox_nd(tora_dim2, domain, N=-1, ϵ=ϵ)
+    oa = overapprox(tora_dim2, domain, N=-1, ϵ=ϵ)
 
     println("Using $jobs jobs")
     result = check_overapprox(oa, domain, [tora_input_vars..., tora_control_vars...], "tora", jobs=jobs, delta_sat=δ)

@@ -32,7 +32,7 @@ function single_pend_dynamics_overt(range_dict, N_OVERT; t_idx=nothing)
         v1 = "$(g/l) * sin(x1_$t_idx) + $(1/(m*l^2)) * u_$t_idx - $(c/(m*l^2)) * x2_$t_idx"
         v1 = Meta.parse(v1) # turns into Expr type
     end
-    v1_oA = overapprox_nd(v1, range_dict; N=N_OVERT)
+    v1_oA = overapprox(v1, range_dict; N=N_OVERT)
     return v1_oA, [v1_oA.output]
 end
 ```

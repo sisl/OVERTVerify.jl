@@ -23,7 +23,7 @@ function tora_dynamics_overt(range_dict::Dict{Symbol, Array{T, 1}} where {T <: R
     	v1 = Meta.parse(v1)
 	end
 
-    oA_out = overapprox_nd(v1, range_dict; N=N_OVERT)
+    oA_out = overapprox(v1, range_dict; N=N_OVERT)
     return oA_out, [oA_out.output]
 end
 
