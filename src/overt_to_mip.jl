@@ -2,6 +2,7 @@ using JuMP
 using GLPK
 using Crayons
 using OVERT
+using Gurobi
 
 """
 ----------------------------------------------
@@ -21,15 +22,19 @@ mutable struct OvertMIP
 end
 
 function _defaultmodel(threads=0)
-    # using Gurobi
-    # return Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))
+    return Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))
     model = Model(GLPK.Optimizer)
     set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
     return model
 end
 
 # default constructor
-function OvertMIP(overt_app::OverApproximation; threads=0, model=_defaultmodel(threads))
+function OvertMIP(overt_app::OverApproximation; threads=0, model="gurobi")
+    model = Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))
+    if model == "glpk" || model == "GLPK"
+        model = Model(GLPK.Optimizer)
+        set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
+    end
     overt_mip_model = OvertMIP(overt_app,
                          model,
                          Dict{Symbol, JuMP.VariableRef}())
