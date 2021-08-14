@@ -17,16 +17,11 @@ The Julia dependencies are listed in the Project.toml file and will be automatic
 
 ## Installation
 ```
-] add https://github.com/sisl/OVERT.jl
 ] add https://github.com/sisl/OVERTVerify.jl
 ```
 
 ## Usage
-See the accompanied documentation [here](docs/src/index.md)
-
-## References
-
-- [1] "*OVERT: An Algorithm for Safety Verification of Neural Network Control Policies for Nonlinear Systems*", Sidrane et al. (2020) [link](https://arxiv.org/abs/2108.01220)
+See the documentation [here](docs/src/index.md)
 
 ### Citation
 ```
