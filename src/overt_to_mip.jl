@@ -2,7 +2,6 @@ using JuMP
 using GLPK
 using Crayons
 using OVERT
-using Gurobi
 
 """
 ----------------------------------------------
@@ -21,19 +20,28 @@ mutable struct OvertMIP
     vars_dict::Dict{Symbol, JuMP.VariableRef}  # dictionary of Overt symbols and their associated variable in mip
 end
 
-function _defaultmodel(threads=0)
-    return Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))
-    model = Model(GLPK.Optimizer)
-    set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
-    return model
+gurobi_model(threads) = error("Gurobi not loaded")
+
+DEFAULT_MODEL = "glpk"
+
+function __init__()
+    @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
+        DEFAULT_MODEL = "gurobi"
+
+        gurobi_model(threads) = Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))      
+    end
 end
 
+
 # default constructor
-function OvertMIP(overt_app::OverApproximation; threads=0, model="gurobi")
-    model = Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))
+function OvertMIP(overt_app::OverApproximation; threads=0, model=DEFAULT_MODEL)
     if model == "glpk" || model == "GLPK"
         model = Model(GLPK.Optimizer)
         set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
+    elseif model == "gurobi" || model == "Gurobi"
+        model = gurobi_model(threads)
+    else
+        error("Model not supported")
     end
     overt_mip_model = OvertMIP(overt_app,
                          model,
