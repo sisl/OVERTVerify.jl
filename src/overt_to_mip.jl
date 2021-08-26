@@ -28,7 +28,7 @@ function __init__()
     @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
         DEFAULT_MODEL = "gurobi"
 
-        gurobi_model(threads) = Model(with_optimizer(Gurobi.Optimizer, OutputFlag=0, Threads=threads))      
+        gurobi_model(threads) = Model(optimizer_with_optimizer(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
     end
 end
 

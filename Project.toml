@@ -28,9 +28,10 @@ Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
 
 [compat]
-julia = "1.5"
 OVERT = "0.1"
 Requires = "1.1"
+julia = "1.5"
+JuMP = "0.21"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
