@@ -36,7 +36,7 @@ using JLD2
 
     concretization_intervals = [2, 2]
 
-    if solver_name(_defaultmodel()) == "GLPK"
+    if DEFAULT_MODEL == "GLPK"
         @warn "Skipping reachability test because GLPK is slow; try testing with Gurobi installed"
     else
         t1 = Dates.time()
