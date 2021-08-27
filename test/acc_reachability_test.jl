@@ -36,7 +36,7 @@ using JLD2
 
     concretization_intervals = [2, 2]
 
-    if DEFAULT_MODEL == "GLPK"
+    if model == "glpk" || model == "GLPK"
         @warn "Skipping reachability test because GLPK is slow; try testing with Gurobi installed"
     else
         t1 = Dates.time()
