@@ -50,3 +50,33 @@ import LazySets.low
 import LazySets.high
 low(x::InfiniteHyperrectangle) = x.low
 high(x::InfiniteHyperrectangle) = x.high
+
+
+function time_exprs(exprs, vars_to_time, t)
+	timed_vars = [Meta.parse("$(v)_$(t)") for v in vars_to_time]
+	map = Dict(zip(vars_to_time, timed_vars))
+	timed_exprs = []
+	for e in exprs
+		push!(timed_exprs, substitute(e, map))
+	end
+	return timed_exprs
+end
+
+# construct OVERT'ed version of problem given expressions of dynamics 
+function get_overt_dynamics(exprs, vars_to_time=[], ϵ=1e-4)
+	# return this function for a given problem.
+	function overt_dynamics_fun(range_dict::Dict{Symbol, Array{T, 1}} where {T <: Real}, N_OVERT::Int=-1, t_idx::Union{Int, Nothing}=nothing)
+		# first determine whether dynamics need to be timestamped 
+		if !isnothing(t_idx)
+			exprs = time_exprs(exprs, vars_to_time, t_idx)
+			@debug("timed expressions: $(exprs)")
+		end
+		oAs = []
+		for expr in exprs 
+			push!(oAs, overapprox(expr, range_dict; N=N_OVERT, ϵ=ϵ))
+		end
+		oA_out = add_overapproximate(oAs)
+		return oA_out, [oA.output for oA in oAs]
+	end 
+	return overt_dynamics_fun
+end

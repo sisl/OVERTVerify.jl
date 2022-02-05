@@ -21,6 +21,7 @@ include("models/single_pendulum/single_pend.jl")
 include("models/tora/tora.jl")
 include("models/car/simple_car.jl")
 include("models/acc/acc.jl")
+include("models/quad/sixD_quad.jl")
 include("overt_parser_minimal.jl")
 include("dreal_wrapper/smt2_interface.jl")
 include("dreal_wrapper/proof_functions.jl")
@@ -32,6 +33,7 @@ export OvertQuery,
     ACC,
     SimpleCar,
     Tora,
+    Quad_6D,
     symbolic_satisfiability,
     symbolic_reachability_with_concretization,
     clean_up_sets,
