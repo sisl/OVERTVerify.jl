@@ -71,7 +71,7 @@ function get_overt_dynamics(exprs, vars_to_time=[], ϵ=1e-4)
 			exprs = time_exprs(exprs, vars_to_time, t_idx)
 			@debug("timed expressions: $(exprs)")
 		end
-		oAs = []
+		oAs = OVERT.OverApproximation[]
 		for expr in exprs 
 			push!(oAs, overapprox(expr, range_dict; N=N_OVERT, ϵ=ϵ))
 		end
