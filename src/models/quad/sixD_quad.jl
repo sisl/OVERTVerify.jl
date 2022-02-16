@@ -15,8 +15,9 @@ function quad_dynamics_6D(x::Array{T, 1} where {T <:Real},
     return [dpx, dpy, dpz, dvx, dvy, dvz]
 end
 
-quad_6_dvx = :($g * tan(θ))
-quad_6_dvy = :($(-g) * tan(ϕ))
+quad_6_dvx = Expr(g * tand(Basic("θ"))) #:($g * tan(θ)) # treat neural network outputs as degrees for now
+quad_6_dvy = Expr(-g * tand(Basic("ϕ")))
+#:($(-g) * tan(ϕ))
 quad_6_dvz = :(τ - $g) # doesn't need overapproximation, but the pipeline as of now will pass it through OVERT and it will remain unchanged.
 
 quad_dynamics_6D_overt = get_overt_dynamics([quad_6_dvx, quad_6_dvy, quad_6_dvz], [:θ, :ϕ, :τ], 1e-4)
