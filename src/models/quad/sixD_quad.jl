@@ -1,4 +1,5 @@
 using OVERT
+using SymEngine
 g = 9.81
 function quad_dynamics_6D(x::Array{T, 1} where {T <:Real},
                        u::Array{T,1} where {T <:Real})

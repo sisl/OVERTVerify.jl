@@ -93,6 +93,7 @@ function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hy
 
     # read controller and add bounds to range dictionary
     cntr_bound = find_controller_bound(network_file, input_set, last_layer_activation)
+	@debug "Bound on outputs of controller are: " cntr_bound
     for i = 1:length(control_vars)
 		range_dict[control_vars[i]] = [cntr_bound.center[i] - cntr_bound.radius[i],
                                      cntr_bound.center[i] + cntr_bound.radius[i]]
