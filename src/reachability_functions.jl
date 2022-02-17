@@ -100,6 +100,7 @@ function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hy
     end
 
 	# call overt and setup overtMIP
+	@debug "Before calling dynamics, range dict is: $(range_dict)"
 	oA, oA_vars = dynamics(range_dict, N_overt, t_idx)
 	mip_model = OvertMIP(oA)
 
@@ -210,6 +211,7 @@ function one_timestep_concretization(query::OvertQuery, input_set::Hyperrectangl
    - oA: all OvertApproximation objects used in the dynamics,
    - oA_vars: all Overt output variables.
 	"""
+	@debug "one timestep concretization: t=$(t_idx)"
 	# reading some query attributes
 	input_vars = query.problem.input_vars
 	control_vars = query.problem.control_vars
@@ -246,8 +248,10 @@ function many_timestep_concretization(query::OvertQuery, input_set_0::Hyperrecta
     for i = 1:query.ntime
         t1 = Dates.now()
         if timed
+			@debug "many timestep concretization: timed, t=$i"
 		   output_set, meas_output_set, oA, oA_vars = one_timestep_concretization(query, input_set; t_idx=i, get_meas=true)
         else
+			@debug "many timestep concretization: untimed"
 		   output_set, meas_output_set, oA, oA_vars = one_timestep_concretization(query, input_set; get_meas=true)
         end
         t2 = Dates.now()

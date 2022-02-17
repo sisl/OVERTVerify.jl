@@ -64,6 +64,9 @@ With a new variable created, the range of that variable will be added to the
 mip model. The ranges are obtained from range attribute of OverApproximation object.
 """
 function get_mip_var(var::Symbol, overt_mip_model::OvertMIP)
+    if var ∈ [:π, :pi]
+        return π
+    end
     if var in keys(overt_mip_model.vars_dict)
         mip_var = overt_mip_model.vars_dict[var]
     else

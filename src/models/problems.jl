@@ -67,9 +67,7 @@ function get_overt_dynamics(exprs, vars_to_time=[], ϵ=1e-4)
 	# return this function for a given problem.
 	function overt_dynamics_fun(range_dict::Dict{Symbol, Array{T, 1}} where {T <: Real}, N_OVERT::Int=-1, t_idx::Union{Int, Nothing}=nothing)
 		@debug "exprs before timing are: $(exprs)"
-		# first determine whether dynamics need to be timestamped 
-		# TODO: re-writing the exprs variable is kept every time this (closure?) is called. so can't do that. 
-		# TODO: AND dictionary keys are not re-mapped. e.g. mapping θ to θ_1 (but I think that is already done inside setup_overt_and_controller_constraints)
+		# first determine whether dynamics need to be timestamped  
 		if !isnothing(t_idx)
 			exprs_to_approx = time_exprs(exprs, vars_to_time, t_idx)
 			@debug("timed expressions: $(exprs_to_approx)")
