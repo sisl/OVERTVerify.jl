@@ -13,3 +13,7 @@ Examples of reachable set computation and feasibility problems are setup in the 
  - [define a new control policy](define_control_policy.md)
  - [reachable set computation problem specification](reachability.md)
  - [feasibility problem specification](feasibility.md)
+
+
+Usage Notes:
+If you would like to use the Gurobi solver (faster than GLPK), do `using Gurobi` before `using OVERTVerify`. OR you can use `set_default_model("gurobi")`. You can check the default model by printing `OVERTVerify.DEFAULT_MODEL`.
