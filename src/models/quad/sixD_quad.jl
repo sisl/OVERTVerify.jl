@@ -9,8 +9,8 @@ function quad_dynamics_6D(x::Array{T, 1} where {T <:Real},
     dpx = vx 
     dpy = vy 
     dpz = vz 
-    dvx = g*tan(θ)
-    dvy = -g*tan(ϕ)
+    dvx = g*tand(θ)
+    dvy = -g*tand(ϕ)
     dvz = τ - g 
 
     return [dpx, dpy, dpz, dvx, dvy, dvz]
