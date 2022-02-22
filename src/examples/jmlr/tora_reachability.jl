@@ -1,3 +1,4 @@
+using Gurobi
 using OVERTVerify
 using LazySets
 using Dates

@@ -1,6 +1,7 @@
 # acc reachability script
 # ENV["JULIA_DEBUG"] = Main # for debugging
 include("../../models/problems.jl")
+using Gurobi
 using OVERTVerify
 using LazySets
 using Dates
