@@ -59,7 +59,7 @@ function time_exprs(exprs, vars_to_time, t)
 	for e in exprs
 		push!(timed_exprs, substitute(e, map))
 	end
-	return timed_exprs
+	return timed_exprs, timed_vars
 end
 
 # construct OVERT'ed version of problem given expressions of dynamics 
@@ -69,14 +69,19 @@ function get_overt_dynamics(exprs, vars_to_time=[], ϵ=1e-4)
 		@debug "exprs before timing are: $(exprs)"
 		# first determine whether dynamics need to be timestamped  
 		if !isnothing(t_idx)
-			exprs_to_approx = time_exprs(exprs, vars_to_time, t_idx)
+			exprs_to_approx, key_vars = time_exprs(exprs, vars_to_time, t_idx)
 			@debug("timed expressions: $(exprs_to_approx)")
 		else
 			exprs_to_approx = exprs
+			key_vars = vars_to_time
 		end
 		oAs = OVERT.OverApproximation[]
 		for expr in exprs_to_approx 
-			@debug "range dict is: $(range_dict)"
+			# @debug "range dict is: $(range_dict)"
+			@debug("Overapproximating $(expr) over domain:")
+			for v in key_vars
+				@debug("\t $v ∈ $(range_dict[v])")
+			end
 			push!(oAs, overapprox(expr, range_dict; N=N_OVERT, ϵ=ϵ))
 		end
 		oA_out = add_overapproximate(oAs)

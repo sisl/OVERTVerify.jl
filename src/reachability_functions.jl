@@ -34,12 +34,16 @@ function add_controller_constraints(model, network_nnet_address, input_set, inpu
     encode_network!(model, network, neurons, deltas, bounds, BoundedMixedIntegerLP())
     @constraint(model, input_vars .== neurons[1])  # set inputvars
     @constraint(model, output_vars .== neurons[end])  # set outputvars
+	bnds_to_print = [b for b in zip(low(bounds[end]), high(bounds[end]))]
+	@debug("controller bounds are: $(bnds_to_print)")
     return bounds[end]
 end
 
 function find_controller_bound(network_file, input_set, last_layer_activation)
     network = read_nnet(network_file; last_layer_activation=last_layer_activation)
     bounds = get_bounds(network, input_set)
+	bnds_to_print = [b for b in zip(low(bounds[end]), high(bounds[end]))]
+	@debug("found controller bounds: $(bnds_to_print)")
     return bounds[end]
 end
 
@@ -97,6 +101,7 @@ function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hy
     for i = 1:length(control_vars)
 		range_dict[control_vars[i]] = [cntr_bound.center[i] - cntr_bound.radius[i],
                                      cntr_bound.center[i] + cntr_bound.radius[i]]
+		@debug("Control input ranges are: $(range_dict[control_vars[i]])")
     end
 
 	# call overt and setup overtMIP
@@ -157,11 +162,13 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 		dv_mip = mip_model.vars_dict[dv]
 		next_v_mip = v_mip + dt * dv_mip
 		push!(timestep_nplus1_vars, next_v_mip)
+		@debug("objective is Min: $(next_v_mip)")
 		@objective(mip_model.model, Min, next_v_mip)
 		JuMP.optimize!(mip_model.model)
 		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
 		push!(lows, objective_bound(mip_model.model))
 		@debug "Objective value for MIN is: $(objective_value(mip_model.model)) and objective bound is $(objective_bound(mip_model.model))"
+		@debug("objective is: Max $(next_v_mip)")
 		@objective(mip_model.model, Max, next_v_mip)
 		JuMP.optimize!(mip_model.model)
 		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
@@ -988,7 +995,7 @@ plotting
 rectangle(w, h, x, y) = Shape(x .+ [0,w,w,0], y .+ [0,0,h,h])
 
 function plot_output_sets(output_sets; idx=[1,2], fig=nothing, linewidth=3,
-    linecolor=:black, linestyle=:solid, fillalpha=0, fill=:red)
+    linecolor=:black, linestyle=:solid, fillalpha=0, fill=:red, label="")
 
     fig = isnothing(fig) ? Plots.plot() : fig
     for s in output_sets
@@ -998,7 +1005,7 @@ function plot_output_sets(output_sets; idx=[1,2], fig=nothing, linewidth=3,
         y = s.center[idx[2]] - s.radius[idx[2]]
         #plot!(rectangle(w,h,x,y), fillalpha=0.0, kwargs)
         Plots.plot!(rectangle(w,h,x,y), fillalpha=fillalpha, fill=fill, legend=nothing,
-                   linewidth=linewidth, linecolor=linecolor, linestyle=linestyle)
+                   linewidth=linewidth, linecolor=linecolor, linestyle=linestyle, label=label)
         Plots.xlabel!("x_$(idx[1])")
         Plots.ylabel!("x_$(idx[2])")
     end

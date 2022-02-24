@@ -27,8 +27,7 @@ DEFAULT_MODEL = "glpk"
 
 function set_default_model(solver)
     if solver == "gurobi"
-        global DEFAULT_MODEL = "gurobi"
-        gurobi_model(threads) = Model(optimizer_with_optimizer(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads)) # if Gurobi hasn't been loaded this will fail
+        __init__()
     elseif solver == "glpk"
         global DEFAULT_MODEL = "glpk"
     else 
@@ -40,7 +39,7 @@ function __init__()
     @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
         DEFAULT_MODEL = "gurobi"
 
-        gurobi_model(threads) = Model(optimizer_with_optimizer(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
+        gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
     end
 end
 
@@ -84,9 +83,6 @@ With a new variable created, the range of that variable will be added to the
 mip model. The ranges are obtained from range attribute of OverApproximation object.
 """
 function get_mip_var(var::Symbol, overt_mip_model::OvertMIP)
-    if var ∈ [:π, :pi]
-        return π
-    end
     if var in keys(overt_mip_model.vars_dict)
         mip_var = overt_mip_model.vars_dict[var]
     else
@@ -180,6 +176,7 @@ low level functions: affine equalities
 function affine_to_mip(expr::Expr, overt_mip_model::OvertMIP)
     lhs = get_mip_var(expr.args[2], overt_mip_model)
     var_list, coeff_list, scalar = get_linear_coeffs(expr.args[3])
+    @debug("expr: $expr, lhs: $lhs, var_list: $(var_list), coeff_list: $(coeff_list), scalar: $scalar")
     for (v, c) in zip(var_list, coeff_list)
         mip_var = get_mip_var(v, overt_mip_model)
         lhs -= mip_var*c
