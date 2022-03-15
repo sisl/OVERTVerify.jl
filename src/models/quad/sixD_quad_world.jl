@@ -4,7 +4,7 @@ g = 9.81
 function quad_dynamics_6D(x::Array{T, 1} where {T <:Real},
                        u::Array{T,1} where {T <:Real})
     """
-    Quad rotor 6-D dynamics in a body-centered frame. 
+    Quadrotor 6D dynamics in a world-centered frame. More complicated than the body-centered dynamics. 
     """
     # state is px, py, pz, vx, vy, vz 
     px, py, pz, vx, vy, vz = x
@@ -12,17 +12,16 @@ function quad_dynamics_6D(x::Array{T, 1} where {T <:Real},
     dpx = vx 
     dpy = vy 
     dpz = vz 
-    dvx = g*tand(θ)
-    dvy = -g*tand(ϕ)
-    dvz = τ - g 
+    dvx = -τ * sin(θ)  # assumes mass is one I think
+    dvy = τ * cos(θ) * sin(ϕ)
+    dvz =  g - τ * cos(θ) * cos(ϕ)
 
     return [dpx, dpy, dpz, dvx, dvy, dvz]
 end
 
-quad_6_dvx = Expr(g * tand(Basic("θ"))) #:($g * tan(θ)) # treat neural network outputs as degrees for now
-quad_6_dvy = Expr(-g * tand(Basic("ϕ")))
-#:($(-g) * tan(ϕ))
-quad_6_dvz = :(τ - $g) # doesn't need overapproximation, but the pipeline as of now will pass it through OVERT and it will remain unchanged.
+quad_6_dvx = :(-τ * sin(θ))
+quad_6_dvy = :(τ * cos(θ) * sin(ϕ))
+quad_6_dvz = :($g - τ * cos(θ) * cos(ϕ))
 
 quad_dynamics_6D_overt = get_overt_dynamics([quad_6_dvx, quad_6_dvy, quad_6_dvz], [:θ, :ϕ, :τ], 1e-4)
 
