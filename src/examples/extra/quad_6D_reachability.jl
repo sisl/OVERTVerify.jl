@@ -10,8 +10,10 @@ using JLD2
 # net = OVERTVerify.random_network([6,5,3], [ReLU(), Id()])
 # OVERTVerify.write_nnet("nnet_files/extra/quad_6D_random.nnet", net)
 
+set_default_model("gurobi")
+
 # read nnet 
-controller_filepath = "../nnet_files/extra/quad_6D_random.nnet"
+controller_filepath = "../../../nnet_files/extra/quad_6D_body_policy_clamp.nnet"
 println("Controller is: $(controller_filepath)")
 query = OvertQuery(
     Quad_6D,
@@ -25,7 +27,7 @@ query = OvertQuery(
 
 # starting set: 
 # Recall that state is: px, py, pz, vx, vy, vz 
-lows = [-1., -1., -1., -0.1, -0.1, -0.1]
+lows = [-1., -.5, -.5, -.5, -0.5, -0.5]
 highs = -lows
 input_set = Hyperrectangle(low=lows, high=highs)
 

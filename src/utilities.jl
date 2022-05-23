@@ -18,3 +18,38 @@ function random_network(layer_sizes, activations; do_round=false)
     end
     return Network(layers)
 end
+
+function get_clamped_nnet(infile, lbs, ubs)
+    network = read_nnet(infile)
+
+    layers = Vector{Layer}()
+    for layer in network.layers
+        push!(layers, layer)
+    end
+
+    N = length(lbs)
+    identity = zeros(N, N)
+    for i = 1:N
+        identity[i, i] = 1.0
+    end
+
+    # Extra layer 0 (gets combined with current last bias)
+    last_layer = Layer(layers[end].weights,
+                        layers[end].bias .- lbs,
+                        ReLU())
+    layers[end] = last_layer
+
+    # Extra layer 1
+    push!(layers, Layer(-identity,
+                        ubs .- lbs,
+                        ReLU()))
+
+    # Extra layer 2
+    push!(layers, Layer(-identity,
+                        ubs,
+                        Id()))
+    
+    clamped_network = Network(layers)
+    #write_nnet(outfile, clamped_network)
+    return clamped_network
+end
