@@ -23,7 +23,7 @@ quad_6_dvx = :($g * tan(θ)) # assume network output is radians
 quad_6_dvy = :($(-g) * tan(ϕ))
 quad_6_dvz = :(τ) # doesn't need overapproximation, but the pipeline as of now will pass it through OVERT and it will remain unchanged.
 
-quad_dynamics_6D_overt = get_overt_dynamics([quad_6_dvx, quad_6_dvy, quad_6_dvz], [:θ, :ϕ, :τ], 1e-4)
+quad_dynamics_6D_overt = get_overt_dynamics([quad_6_dvx, quad_6_dvy, quad_6_dvz], [:θ, :ϕ, :τ], 1e-3)
 
 quad_6D_inputs = [:px, :py, :pz, :vx, :vy, :vz]
 quad_6D_controls = [:θ, :ϕ, :τ]
@@ -47,5 +47,3 @@ Quad_6D = OvertProblem(
     quad_6D_inputs,
     quad_6D_controls
 )
-
-# then: use a random network to test!

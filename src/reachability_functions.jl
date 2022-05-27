@@ -526,6 +526,7 @@ function symbolic_reachability_with_concretization(query::OvertQuery,
 	all_symbolic_meas_sets = []
 	this_set = copy(input_set)
 	for n in concretize_every
+		t1 = time()
 		query.ntime = n
 		concrete_sets, symbolic_set, concrete_meas_sets, symbolic_meas_set = symbolic_reachability(query, this_set, get_meas=true) # pass query and input set
 		push!(all_concrete_sets, concrete_sets)
@@ -533,6 +534,7 @@ function symbolic_reachability_with_concretization(query::OvertQuery,
 		push!(all_concrete_meas_sets, concrete_meas_sets)
 		push!(all_symbolic_meas_sets, symbolic_meas_set)
 		this_set = copy(symbolic_set)
+		println("Timesteps 1:$n computed in ", time() - t1, " seconds.")
 	end
 
 	query.ntime = ntime

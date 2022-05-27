@@ -38,7 +38,7 @@ end
 function __init__()
     @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
         DEFAULT_MODEL = "gurobi"
-
+        println("Using Gurobi.")
         gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
     end
 end
@@ -50,6 +50,7 @@ function OvertMIP(overt_app::OverApproximation; threads=0, model=DEFAULT_MODEL)
         model = Model(GLPK.Optimizer)
         set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
     elseif model == "gurobi" || model == "Gurobi"
+        println("Calling OvertMIP constructor with Gurobi.")
         model = gurobi_model(threads) # if Gurobi hasn't been loaded this will fail
     else
         error("Model not supported")
