@@ -677,8 +677,8 @@ function add_output_constraints!(constraint::HalfSpace, model::JuMP.Model, vars:
 	@constraint(model, (c*x)[1] <= constraint.b)
 end
 
-function add_output_constraints!(constraints::HPolyhedron, model::JuMP.Model, vars::Array)
-	for constraint in constraints
+function add_output_constraints!(set::HPolyhedron, model::JuMP.Model, vars::Array)
+	for constraint in set.constraints
 		add_output_constraints!(constraint, model, vars)
 	end
 end
