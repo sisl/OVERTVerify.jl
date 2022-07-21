@@ -6,6 +6,8 @@ using LazySets
 using Dates
 using JLD2
 
+set_default_model("gurobi")
+
 controller = "acc_controller"
 controller_filepath = "nnet_files/jmlr/"*controller*".nnet"
 println("Controller is: ", controller)
