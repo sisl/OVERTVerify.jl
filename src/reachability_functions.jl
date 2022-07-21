@@ -924,8 +924,16 @@ function monte_carlo_one_simulate(query, x0)
 	return xvec
 end
 
-
 function monte_carlo_simulate(query::OvertQuery, input_set::Hyperrectangle; n_sim::Int64=1000000)
+	# if no controller passed, default to using NN provided in query for control 
+	controller_nnet_address  = query.network_file
+	last_layer_activation = query.last_layer_activation
+	controller = read_nnet(controller_nnet_address, last_layer_activation=last_layer_activation)
+	get_control(x) = compute_output(controller, x)
+	return monte_carlo_simulate(query, input_set, get_control; n_sim=n_sim)
+end
+
+function monte_carlo_simulate(query::OvertQuery, input_set::Hyperrectangle, get_control; n_sim::Int64=1000000)
 	"""
 	Running monte carlo simulations for comparison.
    inputs:
@@ -939,8 +947,6 @@ function monte_carlo_simulate(query::OvertQuery, input_set::Hyperrectangle; n_si
 
 	# unpacking query attributes
 	dynamics_func = query.problem.true_dynamics
-	controller_nnet_address  = query.network_file
-	last_layer_activation = query.last_layer_activation
 	ntime = query.ntime
 	dt = query.dt
 	n_states = length(input_set.center)
@@ -949,7 +955,6 @@ function monte_carlo_simulate(query::OvertQuery, input_set::Hyperrectangle; n_si
 	max_x = [[-Inf64 for n = 1:n_states] for m = 1:ntime]
 	min_y = [[Inf64  for n = 1:n_meas] for m = 1:ntime]
 	max_y = [[-Inf64  for n = 1:n_meas] for m = 1:ntime]
-	controller = read_nnet(controller_nnet_address, last_layer_activation=last_layer_activation)
 	xvec = zeros(n_sim, ntime, n_states)
 	yvec = zeros(n_sim, ntime, n_meas)
 	x0 = zeros(n_sim, n_states)
@@ -961,7 +966,7 @@ function monte_carlo_simulate(query::OvertQuery, input_set::Hyperrectangle; n_si
 	  x0[i, :] = x
 	  y0[i, :] = [LinearAlgebra.dot(x,y_i) for y_i in query.problem.measurement_model]
 	  for j = 1:ntime
-	      u = compute_output(controller, x)
+	      u = get_control(x)
 	      dx = dynamics_func(x, u)
 	      x = x + dx*dt
 		  y = [LinearAlgebra.dot(x,y_i) for y_i in query.problem.measurement_model]

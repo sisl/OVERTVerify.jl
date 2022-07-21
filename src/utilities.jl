@@ -53,3 +53,9 @@ function get_clamped_nnet(infile, lbs, ubs)
     #write_nnet(outfile, clamped_network)
     return clamped_network
 end
+
+function extend_dims(A,which_dim)
+    s = [size(A)...]
+    insert!(s,which_dim,1)
+    return reshape(A, s...)
+end
