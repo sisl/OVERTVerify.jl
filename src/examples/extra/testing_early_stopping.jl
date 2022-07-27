@@ -8,6 +8,7 @@ plotly()
 using JuMP
 OPTIMAL = JuMP.MathOptInterface.OPTIMAL
 TIME_LIMIT = JuMP.MathOptInterface.TIME_LIMIT
+MOI = JuMP.MathOptInterface
 
 # The goal of this sandbox script is to test early stopping techiques.
 # This means stop before the optimization problem is fully solved and report the solution
@@ -77,32 +78,91 @@ end
 # okay! So it can be done. 
 # set_optimizer_attribute(model, "BestBdStop", val) "Terminates as soon as the engine determines that the best bound on the objective value is at least as good as the specified value."
 # 
-threads=0
-model = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))  
+function solve_model_with_threshold()
+    threads=0
+    model = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))  
 
-network_nnet_address = "../../../nnet_files/jmlr/tora_big_controller.nnet"
-input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
-input_vars = @variable(model, inputs[1:4])
-output_var = @variable(model, output)
+    network_nnet_address = "../../../nnet_files/jmlr/tora_big_controller.nnet"
+    input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
+    input_vars = @variable(model, inputs[1:4])
+    output_var = @variable(model, output)
 
-# this just adds a neural network
-add_controller_constraints(model, network_nnet_address, input_set, input_vars, output_var; last_layer_activation=Id())
+    # this just adds a neural network
+    add_controller_constraints(model, network_nnet_address, input_set, input_vars, output_var; last_layer_activation=Id())
 
-# sample bound
-using Flux
-flux_net = Flux.Chain(read_nnet(network_nnet_address))
-samps = sample(input_set, 10000)
-Ys = flux_net(hcat(samps...))
-samp_max = maximum(Ys)
-println("sampled max is: ", samp_max)
+    # # sample bound
+    # using Flux
+    # flux_net = Flux.Chain(read_nnet(network_nnet_address))
+    # samps = sample(input_set, 10000)
+    # Ys = flux_net(hcat(samps...))
+    # samp_max = maximum(Ys)
+    # println("sampled max is: ", samp_max)
+    # # sample bound is not very good. 
 
-# sample bound is not very good. 
+    # add threshold to stop based on primal value being at least this good 
+    # didn't really notice a difference bc problem is so small 
+    set_optimizer_attribute(model, "BestObjStop", -0.5)
 
-# add threshold to stop 
-set_optimizer_attribute(model, "BestObjStop", 2)
+    @objective(model, Max, output_var)
+    JuMP.optimize!(model)
+    println("objective_value(model): ", objective_value(model))
+end
 
-@objective(model, Max, output_var)
-JuMP.optimize!(model)
-objective_value(model)
+# terminate using callback on MIPGap parameter from Gurobi 
+function solve_model_with_callback()
+    threads=0
+    model = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))  
+
+    network_nnet_address = "../../../nnet_files/jmlr/tora_big_controller.nnet"
+    input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
+    input_vars = @variable(model, inputs[1:4])
+    output_var = @variable(model, output)
+
+    # this just adds a neural network
+    add_controller_constraints(model, network_nnet_address, input_set, input_vars, output_var; last_layer_activation=Id())
+
+    # callback function to terminate based on MIPGap 
+    function MIPgapcallback(cb_data, code)
+        println("code is: ", code)
+        # calculate MIPgap 
+        # println("objective value is: ", callback_value(cb_data, output_var))
+        # println("mipgap is: ", mipgap)
+    end
+    MOI.set(model, Gurobi.CallbackFunction(), MIPgapcallback)
+    """
+    Nevermind, seems terribly complicated to use a callback. there is some documentation here
+    https://github.com/jump-dev/Gurobi.jl#callbacks
+    and here 
+    https://discourse.julialang.org/t/ann-upcoming-breaking-changes-to-cplex-jl-and-gurobi-jl/47814
+    about how to query model values like objective and dual/bound in a callback. and then terminate if it's within some tolerance, but honestly seems like way more work than it's worth. 
+    Better to just set MIPGap to be loose/large and know that it won't be optimal even if it says so. 
+    """
+
+    @objective(model, Max, output_var)
+    JuMP.optimize!(model)
+    println("objective_value(model): ", objective_value(model))
+end
+
+function solve_model_with_MIPGap()
+    threads=0
+    model = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 1, "Threads" => threads))  
+
+    network_nnet_address = "../../../nnet_files/jmlr/tora_big_controller.nnet"
+    input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
+    input_vars = @variable(model, inputs[1:4])
+    output_var = @variable(model, output)
+
+    # this just adds a neural network
+    add_controller_constraints(model, network_nnet_address, input_set, input_vars, output_var; last_layer_activation=Id())
+
+    # add threshold to stop based on MIPGap being at least this small 
+    # didn't really notice a difference bc problem is so small 
+    set_optimizer_attribute(model, "MIPGap", 0.001)
+
+    @objective(model, Max, output_var)
+    JuMP.optimize!(model)
+    println("objective_value(model): ", objective_value(model))
+    println("relative gap is: ", relative_gap(model)*100, " %")
+end
 
 # then: integrate into other software!
