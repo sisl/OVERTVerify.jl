@@ -23,7 +23,11 @@ mutable struct OvertQuery
 	ntime::Int64
 	dt::Float64
 	N_overt::Int64
+	early_stop_time::Float64 
+	mipgap::Float64
 end
+
+OvertQuery(problem, network_file, last_layer_activation, solver, ntime, dt, N_overt) = OvertQuery(problem, network_file, last_layer_activation, solver, ntime, dt, N_overt, Inf, 0.0)
 
 Base.copy(x::OvertQuery) = OvertQuery(
 	x.problem,
@@ -32,7 +36,9 @@ Base.copy(x::OvertQuery) = OvertQuery(
 	x.type,
 	x.ntime,
 	x.dt,
-	x.N_overt
+	x.N_overt,
+	x.early_stop_time,
+	x.mipgap
 	)
 
 # this datastructure allows the hyperrectnagle to have inifinite length.

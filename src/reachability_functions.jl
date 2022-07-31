@@ -168,8 +168,14 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 	end
 
 	# set timeout 
-	set_time_limit_sec(mip_model.model, 30) # 30 seconds 
-	set_optimizer_attribute(mip_model.model, "MIPGap", 0.1) # 10 % of optimal # We use objective bound so it doesn't matter that we stop before optimal
+	if query.early_stop_time != Inf
+		println("Setting early stopping time to: ", query.early_stop_time)
+		set_time_limit_sec(mip_model.model, query.early_stop_time) # 30 seconds 
+	end
+	if query.mipgap != 0
+		println("Setting MIPGap to ", query.mipgap)
+		set_optimizer_attribute(mip_model.model, "MIPGap", query.mipgap) # 10 % of optimal # We use objective bound so it doesn't matter that we stop before optimal
+	end
 
 	# setup the future state and optimize.
 	timestep_nplus1_vars = GenericAffExpr{Float64,VariableRef}[]

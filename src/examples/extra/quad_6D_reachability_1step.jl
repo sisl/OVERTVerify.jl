@@ -31,6 +31,8 @@ function quad_6D_reach(input_set, nsteps, concretization_intervals)
         nsteps, # ntime 
         0.1, # dt 
         -1, # N OVERT
+        # 10.0, # early stop time (sec) 
+        # 1e-2, # MIPGap 
     )
 
     t1 = time()
