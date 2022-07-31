@@ -157,12 +157,13 @@ function solve_model_with_MIPGap()
 
     # add threshold to stop based on MIPGap being at least this small 
     # didn't really notice a difference bc problem is so small 
-    set_optimizer_attribute(model, "MIPGap", 0.001)
+    set_optimizer_attribute(model, "MIPGap", 0.5)
 
     @objective(model, Max, output_var)
     JuMP.optimize!(model)
     println("objective_value(model): ", objective_value(model))
     println("relative gap is: ", relative_gap(model)*100, " %")
+    println("termination status is: ", termination_status(model))
 end
 
 # then: integrate into other software!

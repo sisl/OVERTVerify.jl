@@ -118,6 +118,19 @@ function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hy
 	return mip_model, oA, oA_vars
 end
 
+function assess_termination(model)
+	println("Objective value for $(objective_sense(model)) is: $(objective_value(model)) and objective bound is $(objective_bound(model))")
+	if termination_status(model) == MathOptInterface.OPTIMAL && relative_gap(model) <= 0.0001
+		println("termination status optimal.")
+	elseif termination_status(model) == MathOptInterface.TIME_LIMIT 
+		println("stopped due to time limit. ")
+	elseif termination_status(model) == MathOptInterface.OPTIMAL # big relative gap 
+		println("stopped early with MIP gap of: ", relative_gap(model)*100, " % , (parameter MIPGap = ", get_optimizer_attribute(model, "MIPGap")*100, " %")
+	else
+		error("Unexpected termination status: ", termination_status(model))
+	end
+end
+
 function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 	oA_vars::Array{Symbol, 1}, t_idx::Union{Int64, Nothing}; get_meas=false)
 	"""
@@ -154,6 +167,10 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 		integration_map = query.problem.update_rule(input_vars, control_vars, oA_vars)
 	end
 
+	# set timeout 
+	set_time_limit_sec(mip_model.model, 30) # 30 seconds 
+	set_optimizer_attribute(mip_model.model, "MIPGap", 0.1) # 10 % of optimal # We use objective bound so it doesn't matter that we stop before optimal
+
 	# setup the future state and optimize.
 	timestep_nplus1_vars = GenericAffExpr{Float64,VariableRef}[]
 	for v in input_vars_last
@@ -165,15 +182,15 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 		@debug("objective is Min: $(next_v_mip)")
 		@objective(mip_model.model, Min, next_v_mip)
 		JuMP.optimize!(mip_model.model)
-		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+		# @assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+		assess_termination(mip_model.model)
 		push!(lows, objective_bound(mip_model.model))
-		@debug "Objective value for MIN is: $(objective_value(mip_model.model)) and objective bound is $(objective_bound(mip_model.model))"
 		@debug("objective is: Max $(next_v_mip)")
 		@objective(mip_model.model, Max, next_v_mip)
 		JuMP.optimize!(mip_model.model)
-		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+		# @assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+		assess_termination(mip_model.model)
 		push!(highs, objective_bound(mip_model.model))
-		@debug "Objective value for MAX is: $(objective_value(mip_model.model)) and objective bound is $(objective_bound(mip_model.model))"
 	end
 	# get the hyperrectangle.
 	reacheable_set = Hyperrectangle(low=lows, high=highs)
@@ -188,11 +205,13 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 		for measurement_matrix_row in query.problem.measurement_model 
 			@objective(mip_model.model, Min, sum(measurement_matrix_row.*timestep_nplus1_vars))
 			JuMP.optimize!(mip_model.model)
-			@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+			# @assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+			assess_termination(mip_model.model)
 			push!(meas_lows, objective_bound(mip_model.model))
 			@objective(mip_model.model, Max, sum(measurement_matrix_row.*timestep_nplus1_vars))
 			JuMP.optimize!(mip_model.model)
-			@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+			# @assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+			assess_termination(mip_model.model)
 			push!(meas_highs, objective_bound(mip_model.model))
 		end
 		meas_reachable_set = Hyperrectangle(low=meas_lows, high=meas_highs)
