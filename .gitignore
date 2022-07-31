@@ -3,6 +3,7 @@
 *.log
 *.synctex.gz
 *.fdb_latexmk
+plots/*.tex
 plots/*.pdf
 plots/*.html
 debug_log*
@@ -11,3 +12,4 @@ debug_log*
 *.jl.mem
 /Manifest.toml
 /docs/build/
+*.ipynb_checkpoints*
