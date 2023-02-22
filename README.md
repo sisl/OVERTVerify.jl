@@ -25,12 +25,14 @@ See the documentation [here](docs/src/index.md)
 
 ### Citation
 ```
-@misc{sidrane2021overt,
-      title={OVERT: An Algorithm for Safety Verification of Neural Network Control Policies for Nonlinear Systems}, 
-      author={Chelsea Sidrane and Amir Maleki and Ahmed Irfan and Mykel J. Kochenderfer},
-      year={2021},
-      eprint={2108.01220},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@article{sidrane2022overt,
+  title={OVERT: An algorithm for safety verification of neural network control policies for nonlinear systems},
+  author={Sidrane, Chelsea and Maleki, Amir and Irfan, Ahmed and Kochenderfer, Mykel J},
+  journal={Journal of Machine Learning Research},
+  volume={23},
+  number={117},
+  pages={1--45},
+  year={2022}
 }
+
 ```
