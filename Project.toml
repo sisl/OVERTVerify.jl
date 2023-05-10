@@ -27,6 +27,7 @@ QHull = "a8468747-bd6f-53ef-9e5c-744dbc5c59e7"
 Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 SymEngine = "123dc426-2d89-5057-bbad-38513e3affd8"
 PlotlyKaleido = "f2990250-8cf9-495f-b13a-cce12b45703c"
+Plotly="58dd65bb-95f3-509e-9936-c39a10fdeae7"
 [compat]
 OVERT = "0.1"
 Requires = "1.1"
