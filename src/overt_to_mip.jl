@@ -1,5 +1,6 @@
 using JuMP
 using GLPK
+using HiGHS
 using Crayons
 using OVERT
 using Requires
@@ -23,10 +24,12 @@ end
 
 gurobi_model(threads) = error("Gurobi not loaded")
 
-DEFAULT_MODEL = "glpk"
+DEFAULT_MODEL = "highs"
 
 function set_default_model(solver)
-    if solver == "gurobi"
+    if solver == "highs"
+        global DEFAULT_MODEL = "highs"
+    elseif solver == "gurobi"
         __init__()
     elseif solver == "glpk"
         global DEFAULT_MODEL = "glpk"
@@ -35,9 +38,9 @@ function set_default_model(solver)
     end
 end
 
-function __init__()
+function __init__() # TODO: test this works correctly
     @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
-        DEFAULT_MODEL = "gurobi"
+        global DEFAULT_MODEL = "gurobi"
         println("Using Gurobi.")
         gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
     end
@@ -46,7 +49,11 @@ end
 
 # default constructor
 function OvertMIP(overt_app::OverApproximation; threads=0, model=DEFAULT_MODEL)
-    if model == "glpk" || model == "GLPK"
+    if model == "highs" || model == "HiGHS"
+        model = Model(HiGHS.Optimizer)
+        set_attribute(model, MOI.NumberOfThreads(), threads)
+        set_optimizer_attribute(model, "log_to_console", false)
+    elseif model == "glpk" || model == "GLPK"
         model = Model(GLPK.Optimizer)
         set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
     elseif model == "gurobi" || model == "Gurobi"
