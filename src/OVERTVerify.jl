@@ -3,6 +3,7 @@ module OVERTVerify
 include("dependencies.jl")
 
 export OvertQuery,
+
     SinglePendulum,
     ACC,
     SimpleCar,
