@@ -1,6 +1,6 @@
 # OVERTVerify
 
-[![Build Status](https://github.com/sisl/OVERTVerify.jl/workflows/CI/badge.svg)](https://github.com/sisl/OVERTVerify.jl/actions)
+[![CI](https://github.com/sisl/OVERTVerify.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/sisl/OVERTVerify.jl/actions/workflows/CI.yml)
 [![codecov](https://codecov.io/gh/sisl/OVERTVerify.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sisl/OVERTVerify.jl)
 
 This repo integrates OVERT with reachability functionality for the purpose of verifying closed-loop systems with neural network control policies.
