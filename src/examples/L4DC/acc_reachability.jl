@@ -1,26 +1,20 @@
 # acc reachability script
 # ENV["JULIA_DEBUG"] = Main # for debugging
-include("../../models/problems.jl")
-include("../../models/acc/acc.jl")
-include("../../nv/utils/activation.jl")
-include("../../reachability_functions.jl")
 using Gurobi
-# using OVERTVerify
+using OVERTVerify 
 using LazySets
 using Dates
 using JLD2
 
-controller = "acc_controller"
-controller_filepath = "nnet_files/jmlr/"*controller*".nnet"
-println("Controller is: ", controller)
+controller = "nnet_files/L4DC/controllerACC.nnet"
 query = OvertQuery(
     ACC,  # problem
-    controller_filepath,    # network file
+    controller,    # network file
     Id(),      	# last layer activation layer Id()=linear, or ReLU()=relu
     "MIP",     	# query solver, "MIP" or "ReluPlex"
-    55,        	# ntime
+    2,        	# ntime
     0.1,       	# dt
-    -1,        	# N_overt
+    2,        	# N_overt
     )
 
 # x1,x2,x3 are lead vehicle variables
@@ -37,14 +31,15 @@ input_set = Hyperrectangle(
     high=[v_range[2] for v_range in var_list]
     )
 
-concretization_intervals = Int.(ones(query.ntime))
+concretization_intervals = [20, 20, 15]
 t1 = Dates.time()
-concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals)
+@time sets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
 t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
 
-# TODO: Intersect all sets with output constraint and see if
+
+# Intersect all sets with output constraint and see if
 # reachable set is fully within safe set OR check to see if it ever intersects unsafe set
 # they are equivalent
 # We want the measurement to be greater than 10, always. So the unsafe set if <= 10
@@ -57,4 +52,4 @@ safe, violations = check_avoid_set_intersection(reachable_meas_sets, input_set, 
 dt_check = time() - t1
 
  
-JLD2.@save "src/examples/jmlr/data/acc_reachability_data_1step_55.jld2" query input_set concretization_intervals concrete_state_sets concrete_meas_sets symbolic_state_sets symbolic_meas_sets dt controller avoid_sets reachable_meas_sets safe violations dt_check
+JLD2.@save "src/examples/jmlr/data/acc_reachability_data_55.jld2" query input_set concretization_intervals concrete_state_sets concrete_meas_sets symbolic_state_sets symbolic_meas_sets dt controller avoid_sets reachable_meas_sets safe violations dt_check

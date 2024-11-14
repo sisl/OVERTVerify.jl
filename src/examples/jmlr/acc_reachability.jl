@@ -6,9 +6,10 @@ using LazySets
 using Dates
 using JLD2
 
-set_default_model("gurobi")
+#set_default_model("gurobi")
 
-controller = "acc_controller"
+#controller = "acc_controller"
+controller = "controllerACC"
 controller_filepath = "nnet_files/jmlr/"*controller*".nnet"
 println("Controller is: ", controller)
 query = OvertQuery(
@@ -16,9 +17,9 @@ query = OvertQuery(
     controller_filepath,    # network file
     Id(),      	# last layer activation layer Id()=linear, or ReLU()=relu
     "MIP",     	# query solver, "MIP" or "ReluPlex"
-    55,        	# ntime
+    50,        	# ntime
     0.1,       	# dt
-    -1,        	# N_overt
+    2,        	# N_overt
     )
 
 # x1,x2,x3 are lead vehicle variables
@@ -35,19 +36,48 @@ input_set = Hyperrectangle(
     high=[v_range[2] for v_range in var_list]
     )
 
-concretization_intervals = [20, 20, 15]
-t1 = Dates.time()
-concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals)
-t2 = Dates.time()
-dt = (t2-t1)
-print("elapsed time= $(dt) seconds")
+# concretization_intervals = [20, 20, 15]
+# t1 = Dates.time()
+# concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals)
+# t2 = Dates.time()
+# dt = (t2-t1)
+# print("elapsed time= $(dt) seconds")
 
+@time reachsets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
 # Intersect all sets with output constraint and see if
 # reachable set is fully within safe set OR check to see if it ever intersects unsafe set
 # they are equivalent
 # We want the measurement to be greater than 10, always. So the unsafe set if <= 10
+
+t = 2
+extrema(reachsets[t])[1]
+extrema(reachsets[t])[2]
+
+
+
+using JLD2
+@save "overtLows.jld2" lowSets
+@save "overtHighs.jld2" highSets
 avoid_sets = [HalfSpace([1.], 10.)] # 1*y <= 10
 
+dRel = Any[]
+dSafe = Any[]
+for reachset in reachsets
+    reachInts = extrema(reachset)
+    dRel_min = minimum([reachInts[1][1] - reachInts[1][4], reachInts[1][1] - reachInts[2][4], reachInts[2][1] - reachInts[1][4], reachInts[2][1] - reachInts[2][4]])
+    dRel_max = maximum([reachInts[1][1] - reachInts[1][4], reachInts[1][1] - reachInts[2][4], reachInts[2][1] - reachInts[1][4], reachInts[2][1] - reachInts[2][4]])
+    dSafe_min = 10 + 1.40*reachInts[1][5]
+    dSafe_max = 10 + 1.40*reachInts[2][5]
+    # vRel_min = minimum([reachInts[1][2] - reachInts[1][5], reachInts[1][2] - reachInts[2][5], reachInts[2][2] - reachInts[1][5], reachInts[2][2] - reachInts[2][5]])
+    # vRel_max = maximum([reachInts[1][2] - reachInts[1][5], reachInts[1][2] - reachInts[2][5], reachInts[2][2] - reachInts[1][5], reachInts[2][2] - reachInts[2][5]])
+    # dRel_hyp = Hyperrectangle(low=[dRel_min, vRel_min], high=[dRel_max, vRel_max])
+    dRel_hyp = Hyperrectangle(low=[dRel_min], high=[dRel_max])
+    dSafe_hyp = Hyperrectangle(low=[dSafe_min], high=[dSafe_max])
+    push!(dRel, dRel_hyp)
+    push!(dSafe, dSafe_hyp)
+end
+
+(extrema(dRel[end])[2] - extrema(dRel[end])[1])[1]
 reachable_meas_sets = clean_up_meas_sets(concrete_meas_sets, symbolic_meas_sets, concretization_intervals)
 
 t1 = time()

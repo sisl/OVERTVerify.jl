@@ -5,36 +5,23 @@ using Dates
 using JLD2
 #ENV["JULIA_DEBUG"] = Main
 
-controller_name = big
-controller = "nnet_files/jmlr/car_$(controller_name)_controller.nnet"
-println("Controller is: ", controller)
+controller = "nnet_files/L4DC/controllerUnicycle.nnet"
 
 query = OvertQuery(
 	SimpleCar,  # problem
 	controller,    # network file
 	Id(),      	# last layer activation layer Id()=linear
 	"MIP",     	# query solver, "MIP" or "ReluPlex"
-	10,        	# ntime
-	0.2,       	# dt
+	50,        	# ntime
+	0.1,       	# dt
 	2,        	# N_overt
 	)
 
 input_set = Hyperrectangle(low=[9.5, -4.5, 2.1, 1.5], high=[9.55, -4.45, 2.11, 1.51])
-
-query1 = deepcopy(query)
-query1.ntime = 1
-@time reachset, boundset = OVERTVerify.one_timestep_concretization(query1, input_set);
-
-query2 = deepcopy(query)
-query2.ntime = 10
-@time reachsets, boundsets = OVERTVerify.many_timestep_concretization(query2, input_set);
-
-query3 = deepcopy(query)
-@time res = OVERTVerify.symbolic_reachability(query3, input_set)
-
-concretization_intervals = [5, 5]
-t1 = Dates.time()
-concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals)
+concretization_intervals = [5,5,5,5,5,5,5,5,5,5]
+@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals);
+symbolic_state_sets[end]
+symbolic_state_sets[2]
 t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
