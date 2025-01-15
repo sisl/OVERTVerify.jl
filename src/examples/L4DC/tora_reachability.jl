@@ -3,8 +3,8 @@ using OVERTVerify
 using LazySets
 using Dates
 
-controller = "nnet_files/L4DC/controllerTORA.nnet"
-
+println("Running SinglePendulum Benchmark")
+controller = "../../../nnet_files/L4DC/controllerTORA.nnet"
 query = OvertQuery(
 	Tora,      # problem
 	controller, # network file
@@ -16,26 +16,31 @@ query = OvertQuery(
 	)
 
 input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
-t1 = Dates.time()
+#Unitimed run
+query1 = deepcopy(query)
+sets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
+
+#Timed run
+tstart = Dates.now()
+query1 = deepcopy(query)
 @time sets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
-t2 = Dates.time()
-dt = (t2-t1)
-print("elapsed time= $(dt) seconds")
-
-sets[end]
-volume(sets[end])
+tend = Dates.now()
+println(volume(sets[end]))
+println("#############################################################################################")
+println("Time taken to compute concrete reach: ", tend-tstart)
+println("###################################################################################")
 # clean up sets 
-init_set0, reachable_state_sets = clean_up_sets(concrete_state_sets, symbolic_state_sets, concretization_intervals)
+# init_set0, reachable_state_sets = clean_up_sets(concrete_state_sets, symbolic_state_sets, concretization_intervals)
 
-# we want to check inclusion in the safe set:
-constraint1 = HalfSpace([1., 0., 0., 0.], 2.) # x1 <= 2
-constraint2 = HalfSpace([-1., 0., 0., 0.], 2.) # -x1 <= 2 aka x1 >= -2
-safe_set = HPolyhedron([constraint1, constraint2])
-t1 = time()
-safe_steps = reachable_state_sets .⊆ Ref(safe_set)
-violations = .!safe_steps
-safe = all(safe_steps)
-dt_check = time() - t1
+# # we want to check inclusion in the safe set:
+# constraint1 = HalfSpace([1., 0., 0., 0.], 2.) # x1 <= 2
+# constraint2 = HalfSpace([-1., 0., 0., 0.], 2.) # -x1 <= 2 aka x1 >= -2
+# safe_set = HPolyhedron([constraint1, constraint2])
+# t1 = time()
+# safe_steps = reachable_state_sets .⊆ Ref(safe_set)
+# violations = .!safe_steps
+# safe = all(safe_steps)
+# dt_check = time() - t1
 
-using JLD2
-JLD2.@save "src/examples/jmlr/data/tora_reachability_$(controller_name)_controller_data.jld2" query input_set safe_set concrete_state_sets symbolic_state_sets concrete_meas_sets symbolic_meas_sets reachable_state_sets dt safe violations dt_check concretization_intervals
+# using JLD2
+# JLD2.@save "src/examples/jmlr/data/tora_reachability_$(controller_name)_controller_data.jld2" query input_set safe_set concrete_state_sets symbolic_state_sets concrete_meas_sets symbolic_meas_sets reachable_state_sets dt safe violations dt_check concretization_intervals
