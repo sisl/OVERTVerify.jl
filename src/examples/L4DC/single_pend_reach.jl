@@ -6,6 +6,7 @@ include("models/single_pendulum/single_pend.jl")
 
 println("Running SinglePendulum Benchmark")
 controller = "../../../nnet_files/L4DC/controllerSinglePendulum.nnet"
+controller = "nnet_files/L4DC/controllerSinglePendulum.nnet"
 
 query = OVERTVerify.OvertQuery(
 	SinglePendulum2,    # problem

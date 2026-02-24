@@ -6,6 +6,7 @@ using JLD2
 #ENV["JULIA_DEBUG"] = Main
 println("Running Car Benchmark")
 controller = "../../../nnet_files/L4DC/controllerUnicycle.nnet"
+controller = "nnet_files/L4DC/controllerUnicycle.nnet"
 
 query = OvertQuery(
 	SimpleCar,  # problem
@@ -20,16 +21,18 @@ query = OvertQuery(
 input_set = Hyperrectangle(low=[9.5, -4.5, 2.1, 1.5], high=[9.55, -4.45, 2.11, 1.51])
 # concretization_intervals = [5,5,5,5,5,5,5,5,5,5]
 # Untimed run
-# query1 = deepcopy(query)
-# concretization_intervals = [5,5]
+query1 = deepcopy(query)
+concretization_intervals = [5,5]
 # query1.ntime = 10
 # @time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query1, input_set, concretization_intervals);
 
-# #Timed Running
+# # #Timed Running
 # tstart = Dates.now()
 # query1 = deepcopy(query)
 # concretization_intervals = [10,10,10,10,10]
 # @time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query1, input_set, concretization_intervals);
+
+# volume(symbolic_state_sets[end])
 # symbolic_state_sets[end]
 # symbolic_state_sets[2]
 # tend = Dates.now()
@@ -62,13 +65,16 @@ input_set = Hyperrectangle(low=[9.5, -4.5, 2.1, 1.5], high=[9.55, -4.45, 2.11, 1
 
 # JLD2.@save "src/examples/jmlr/data/car_reachability_"*string(controller_name)*"_controller_data.jld2" query input_set concretization_intervals goal_set concrete_state_sets symbolic_state_sets concrete_meas_sets symbolic_meas_sets reachable_state_sets dt goal_reached goal_reached_steps dt_check 
 #untimed run
+
+#####Scaling Benchmark###############
 for i=1:2
 	squery = deepcopy(query)
 	squery.ntime = i
 	@time OVERTVerify.symbolic_reachability(squery::OvertQuery, input_set::Hyperrectangle)
 end
 
-for i=1:14
+for i=1:20
+	println("Running for ntime = ", i)
 	squery = deepcopy(query)
 	squery.ntime = i
 	println(i)

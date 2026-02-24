@@ -5,6 +5,7 @@ using Dates
 
 println("Running SinglePendulum Benchmark")
 controller = "../../../nnet_files/L4DC/controllerTORA.nnet"
+controller = "nnet_files/L4DC/controllerTORA.nnet"
 query = OvertQuery(
 	Tora,      # problem
 	controller, # network file
@@ -18,7 +19,8 @@ query = OvertQuery(
 input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
 #Unitimed run
 query1 = deepcopy(query)
-sets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
+@time sets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
+volume(sets[end])
 
 #Timed run
 tstart = Dates.now()

@@ -5,7 +5,7 @@ using Dates
 
 # controller_type = ARGS[1] # pass from command line, e.g. "small"
 # controller = "nnet_files/jmlr/single_pendulum_$(controller_type)_controller.nnet"
-controller = "nnet_files/jmlr/controllerSinglePendulum.nnet"
+controller = "nnet_files/L4DC/controllerSinglePendulum.nnet"
 println("Controller: ", controller)
 query = OvertQuery(
 	SinglePendulum,    # problem
@@ -23,12 +23,13 @@ concretization_intervals = [10]
 
 #@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals);
 
-#sets, bounds = @time OVERTVerify.many_timestep_concretization(query, input_set);
+sets, bounds = @time OVERTVerify.many_timestep_concretization(query, input_set);
+volume(sets[10])
 
 # sets[11]
 # extrema(sets[11])[2][1] - extrema(sets[11])[1][1]
 
-@time res = OVERTVerify.symbolic_reachability(query, input_set)
+#@time res = OVERTVerify.symbolic_reachability(query, input_set)
 
 extrema(res[2])[1]
 extrema(res[2])[2]

@@ -1,5 +1,6 @@
 using JuMP
 using GLPK
+using Gurobi
 using Crayons
 using OVERT
 using Requires
@@ -21,9 +22,10 @@ mutable struct OvertMIP
     vars_dict::Dict{Symbol, JuMP.VariableRef}  # dictionary of Overt symbols and their associated variable in mip
 end
 
-gurobi_model(threads) = error("Gurobi not loaded")
+#gurobi_model(threads) = error("Gurobi not loaded")
+gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
 
-DEFAULT_MODEL = "glpk"
+DEFAULT_MODEL = "gurobi"
 
 function set_default_model(solver)
     if solver == "gurobi"
@@ -35,13 +37,13 @@ function set_default_model(solver)
     end
 end
 
-function __init__()
-    @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
-        DEFAULT_MODEL = "gurobi"
-        println("Using Gurobi.")
-        gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
-    end
-end
+# function __init__()
+#     @require Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b" begin
+#         DEFAULT_MODEL = "gurobi"
+#         println("Using Gurobi.")
+#         gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
+#     end
+# end
 
 
 # default constructor
@@ -52,6 +54,7 @@ function OvertMIP(overt_app::OverApproximation; threads=0, model=DEFAULT_MODEL)
     elseif model == "gurobi" || model == "Gurobi"
         println("Calling OvertMIP constructor with Gurobi.")
         model = gurobi_model(threads) # if Gurobi hasn't been loaded this will fail
+        set_string_names_on_creation(model, false)
     else
         error("Model not supported")
     end

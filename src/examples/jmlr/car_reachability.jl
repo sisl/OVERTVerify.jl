@@ -5,9 +5,10 @@ using Dates
 using JLD2
 #ENV["JULIA_DEBUG"] = Main
 
-controller_name = big
-controller = "nnet_files/jmlr/car_$(controller_name)_controller.nnet"
-println("Controller is: ", controller)
+# controller_name = big
+# controller = "nnet_files/jmlr/car_$(controller_name)_controller.nnet"
+# println("Controller is: ", controller)
+controller = "nnet_files/L4DC/controllerUnicycle.nnet"
 
 query = OvertQuery(
 	SimpleCar,  # problem

@@ -7,6 +7,7 @@ using Dates
 using JLD2
 
 controller = "nnet_files/L4DC/controllerACC.nnet"
+#controller = "nnet_files/jmlr/acc_controller.nnet"
 query = OvertQuery(
     ACC,  # problem
     controller,    # network file
@@ -34,6 +35,8 @@ input_set = Hyperrectangle(
 concretization_intervals = [20, 20, 15]
 t1 = Dates.time()
 @time sets, bounds = OVERTVerify.many_timestep_concretization(query, input_set);
+
+volume(sets[end])
 t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
