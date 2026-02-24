@@ -28,3 +28,8 @@ include("dreal_wrapper/proof_functions.jl")
 include("dreal_wrapper/dreal_utils.jl")
 include("dreal_wrapper/compare_to_dreal.jl")
 include("utilities.jl")
+
+#JMLR Deps 
+include("examples/jmlr2/models/att.jl")
+include("examples/jmlr2/models/unicycle.jl")
+include("examples/jmlr2/models/tora.jl")

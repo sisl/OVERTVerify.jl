@@ -1,0 +1,9 @@
+run_id = "tora_fwd_200"
+
+script = "src/examples/tora.jl"
+project = "."
+
+# optional: any parameters your Julia code reads from the config
+[params]
+controller = "/home/sam/Research/OVERTVerify.jl/nnet_files/jmlr2/controllerTora200.nnet"
+ntime = 20

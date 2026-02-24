@@ -12,7 +12,7 @@ query = OvertQuery(
     controller,    # network file
     Id(),      	# last layer activation layer Id()=linear, or ReLU()=relu
     "MIP",     	# query solver, "MIP" or "ReluPlex"
-    2,        	# ntime
+    50,        	# ntime
     0.1,       	# dt
     2,        	# N_overt
     )
@@ -38,7 +38,8 @@ t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
 
-
+volume(sets[end])
+extrema(sets[end])
 # Intersect all sets with output constraint and see if
 # reachable set is fully within safe set OR check to see if it ever intersects unsafe set
 # they are equivalent

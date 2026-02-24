@@ -1,0 +1,9 @@
+run_id = "tora_fwd_50"
+
+script = "src/examples/jmlr2/tora_reachability.jl"
+project = "."
+
+# optional: any parameters your Julia code reads from the config
+[params]
+controller = "/home/sam/Research/OVERTVerify.jl/nnet_files/jmlr2/controllerTora50.nnet"
+ntime = 20

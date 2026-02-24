@@ -1,0 +1,9 @@
+run_id = "unicycle_fwd_500"
+
+script = "src/examples/jmlr2/car_reachability.jl"
+project = "."
+
+# optional: any parameters your Julia code reads from the config
+[params]
+controller = "/home/sam/Research/OVERTVerify.jl/nnet_files/jmlr2/controllerUnicycle500.nnet"
+ntime = 50

@@ -1,0 +1,9 @@
+run_id = "att_fwd_128"
+
+script = "src/examples/jmlr2/att_reachability.jl"
+project = "."
+
+# optional: any parameters your Julia code reads from the config
+[params]
+controller = "/home/sam/Research/OVERTVerify.jl/nnet_files/jmlr2/controllerAtt.nnet"
+ntime = 10
