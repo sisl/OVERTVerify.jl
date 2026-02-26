@@ -18,7 +18,8 @@ controller = cfg["params"]["controller"]
 ntime = cfg["params"]["ntime"]
 
 @info "Warm up run"
-query = OvertQuery(
+@info "ntime: $ntime"
+query1 = OvertQuery(
 	Attitude,  # problem
 	controller,    # network file
 	Id(),      	# last layer activation layer Id()=linear
@@ -30,9 +31,10 @@ query = OvertQuery(
 
 input_set = Hyperrectangle(low=[-0.75, 0.85, -0.65, -0.45, -0.55, 0.65], high=[-0.74, 0.86, -0.64, -0.44, -0.54, 0.66])
 concretization_intervals = [2]
-@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals);
-symbolic_state_sets[end]
-symbolic_state_sets[2]
+t1 = Dates.time()
+@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query1, input_set, concretization_intervals);
+# symbolic_state_sets[end]
+# symbolic_state_sets[2]
 t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
@@ -52,9 +54,9 @@ query = OvertQuery(
 concretization_intervals = [ntime]
 t1 = now()
 @info "Start time: $t1"
-@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals);
+@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals, timeout=3600);
 t2 = now()
 dt = t2 - t1
 @info "End time: $t2"
 @info "Elapsed time: $dt seconds"
-@info "Set volume at final step: $(volume(symbolic_state_sets[end]))"
+@info "Set volume at final step: $(LazySets.volume(symbolic_state_sets[end]))"

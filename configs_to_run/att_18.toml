@@ -5,5 +5,5 @@ project = "."
 
 # optional: any parameters your Julia code reads from the config
 [params]
-controller = "/home/sam/Research/OVERTVerify.jl/nnet_files/jmlr2/controllerAtt.nnet"
+controller = "/home/sam/Documents/Code/OVERTVerify.jl/nnet_files/jmlr2/controllerAtt.nnet"
 ntime = 18

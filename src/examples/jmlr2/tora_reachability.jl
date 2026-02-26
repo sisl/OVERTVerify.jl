@@ -17,7 +17,8 @@ controller = cfg["params"]["controller"]
 ntime = cfg["params"]["ntime"]
 
 @info "Warm up run"
-query = OvertQuery(
+@info "ntime: $ntime"
+query1 = OvertQuery(
 	Tora,      # problem
 	controller, # network file
 	Id(),    # last layer activation layer Id()=linear, or ReLU()=relu
@@ -29,7 +30,9 @@ query = OvertQuery(
 
 input_set = Hyperrectangle(low=[0.6, -0.7, -0.4, 0.5], high=[0.7, -0.6, -0.3, 0.6])
 t1 = Dates.time()
-@time sets_val, bounds_val = many_timestep_concretization(query, input_set);
+concretization_intervals = [2]
+@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query1, input_set, concretization_intervals);
+symbolic_state_sets[end]
 t2 = Dates.time()
 dt = (t2-t1)
 print("elapsed time= $(dt) seconds")
@@ -47,9 +50,11 @@ query = OvertQuery(
 
 t1 = now()
 @info "Start time: $t1"
-@time sets_val, bounds_val = many_timestep_concretization(query, input_set);
+concretization_intervals = [10,10]
+@time concrete_state_sets, symbolic_state_sets, concrete_meas_sets, symbolic_meas_sets = symbolic_reachability_with_concretization(query, input_set, concretization_intervals);
+symbolic_state_sets[end]
 t2 = now()
 dt = t2 - t1
 @info "End time: $t2"
 @info "Elapsed time: $dt seconds"
-@info "Set volume at final step: $(volume(sets_val[end]))"
+@info "Set volume at final step: $(LazySets.volume(symbolic_state_sets[end]))"

@@ -23,7 +23,7 @@ mutable struct OvertMIP
 end
 
 #gurobi_model(threads) = error("Gurobi not loaded")
-gurobi_model(threads) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads))      
+gurobi_model(threads, timeout) = Model(optimizer_with_attributes(Gurobi.Optimizer, "OutputFlag" => 0, "Threads" => threads, "TimeLimit" => timeout))      
 
 DEFAULT_MODEL = "gurobi"
 
@@ -47,13 +47,13 @@ end
 
 
 # default constructor
-function OvertMIP(overt_app::OverApproximation; threads=0, model=DEFAULT_MODEL)
+function OvertMIP(overt_app::OverApproximation; threads=0, model=DEFAULT_MODEL, timeout=3600)
     if model == "glpk" || model == "GLPK"
         model = Model(GLPK.Optimizer)
         # set_optimizer_attribute(model, "msg_lev", GLPK.MSG_OFF)                         
     elseif model == "gurobi" || model == "Gurobi"
         println("Calling OvertMIP constructor with Gurobi.")
-        model = gurobi_model(threads) # if Gurobi hasn't been loaded this will fail
+        model = gurobi_model(threads, timeout) # if Gurobi hasn't been loaded this will fail
         set_string_names_on_creation(model, false)
     else
         error("Model not supported")

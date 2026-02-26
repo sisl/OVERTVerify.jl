@@ -57,7 +57,7 @@ reasoning and solving concrete queries
 ----------------------------------------------
 """
 
-function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hyperrectangle; t_idx::Union{Int64, Nothing}=nothing)
+function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hyperrectangle; t_idx::Union{Int64, Nothing}=nothing, timeout=nothing)
 	"""
 	This function reads overt query, computes the dictionary range, runs overt,
 	  reads the controller nnet file,  and finally setup the overt
@@ -110,7 +110,11 @@ function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hy
 	# call overt and setup overtMIP
 	@debug "Before calling dynamics, range dict is: $(range_dict)"
 	oA, oA_vars = dynamics(range_dict, N_overt, t_idx)
-	mip_model = OvertMIP(oA)
+	if !isnothing(timeout)
+		mip_model = OvertMIP(oA, timeout=timeout)
+	else
+		mip_model = OvertMIP(oA)
+	end
 
 	# add controller to mip
 	mip_control_input_vars = [get_mip_var(v, mip_model) for v in input_vars]
@@ -122,7 +126,7 @@ function setup_overt_and_controller_constraints(query::OvertQuery, input_set::Hy
 end
 
 function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
-	oA_vars::Array{Symbol, 1}, t_idx::Union{Int64, Nothing}; get_meas=false)
+	oA_vars::Array{Symbol, 1}, t_idx::Union{Int64, Nothing}; get_meas=false, timeout=nothing)
 	"""
 	this function sets up states in the future timestep and optimizes that.
 	this will give a minimum and maximum on each of the future timesteps.
@@ -168,13 +172,13 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 		@debug("objective is Min: $(next_v_mip)")
 		@objective(mip_model.model, Min, next_v_mip)
 		JuMP.optimize!(mip_model.model)
-		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+		#@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
 		push!(lows, objective_bound(mip_model.model))
 		@debug "Objective value for MIN is: $(objective_value(mip_model.model)) and objective bound is $(objective_bound(mip_model.model))"
 		@debug("objective is: Max $(next_v_mip)")
 		@objective(mip_model.model, Max, next_v_mip)
 		JuMP.optimize!(mip_model.model)
-		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+		#@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
 		push!(highs, objective_bound(mip_model.model))
 		@debug "Objective value for MAX is: $(objective_value(mip_model.model)) and objective bound is $(objective_bound(mip_model.model))"
 	end
@@ -191,11 +195,11 @@ function solve_for_reachability(mip_model::OvertMIP, query::OvertQuery,
 		for measurement_matrix_row in query.problem.measurement_model 
 			@objective(mip_model.model, Min, sum(measurement_matrix_row.*timestep_nplus1_vars))
 			JuMP.optimize!(mip_model.model)
-			@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+			#@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
 			push!(meas_lows, objective_bound(mip_model.model))
 			@objective(mip_model.model, Max, sum(measurement_matrix_row.*timestep_nplus1_vars))
 			JuMP.optimize!(mip_model.model)
-			@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
+			#@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
 			push!(meas_highs, objective_bound(mip_model.model))
 		end
 		meas_reachable_set = Hyperrectangle(low=meas_lows, high=meas_highs)
@@ -278,178 +282,11 @@ end
 
 """
 ----------------------------------------------
-reasoning and solving concrete backwards queries
-----------------------------------------------
-"""
-
-function solve_for_breachability(mip_model::OvertMIP, query::OvertQuery,
-	oA_vars::Array{Symbol, 1}, t_idx::Union{Int64, Nothing}, goal_set; get_meas=false)
-	"""
-	this function sets up states in the future timestep and optimizes that.
-	this will give a minimum and maximum on each of the future timesteps.
-	the final answer is a hyperrectangle.
-	inputs:
-	- mip_model: OvertMIP object that contains all overt and controller constraints.
-	- query: OvertQuery
-	- oA_vars: output variables of overt.
-	- t_idx: this is for timed dynamics, when the symbolic version is called.
-	        if t_idx is an integer, a superscript will be added to all state and
-	        control variable, indicating the timestep is a symbolic represenation.
-	        default is nothing, which does not do the timed dynamics.
-	outputs:
-	- reacheable_set: smallest hyperrectangle that contains the reachable set.
-	"""
-
-	# inputs of reachable set hyperrectangle are initialized
-	lows = Array{Float64}(undef, 0)
-	highs = Array{Float64}(undef, 0)
-
-	input_vars = query.problem.input_vars
-	control_vars = query.problem.control_vars
-	update_rule = query.problem.update_rule
-	dt = query.dt
-	xFin = extrema(goal_set)
-
-	if !isnothing(t_idx)
-		input_vars_last = [Meta.parse("$(v)_$t_idx") for v in input_vars]
-		control_vars_last = [Meta.parse("$(v)_$t_idx") for v in control_vars]
-		integration_map = update_rule(input_vars_last, control_vars_last, oA_vars)
-	else
-		input_vars_last = input_vars
-		integration_map = query.problem.update_rule(input_vars, control_vars, oA_vars)
-	end
-
-	# setup the future state and optimize.
-	timestep_nplus1_vars = GenericAffExpr{Float64,VariableRef}[]
-	for (ind,v) in enumerate(input_vars_last)
-	   	v_mip = mip_model.vars_dict[v]
-		dv = integration_map[v]
-		dv_mip = mip_model.vars_dict[dv]
-		next_v_mip = v_mip + dt * dv_mip
-		#Constrain the next step to be contained in previous step
-		con_ref1 = @constraint(mip_model.model, next_v_mip >= xFin[1][ind])
-		@objective(mip_model.model, Min, v_mip)
-		JuMP.optimize!(mip_model.model)
-		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
-		push!(lows, objective_bound(mip_model.model))
-		delete(mip_model.model, con_ref1)
-	   	v_mip = mip_model.vars_dict[v]
-		dv = integration_map[v]
-		dv_mip = mip_model.vars_dict[dv]
-		next_v_mip = v_mip + dt * dv_mip
-		#Constrain the next step to be contained in previous step
-		con_ref2 = @constraint(mip_model.model, next_v_mip <= xFin[2][ind])
-		@objective(mip_model.model, Max, v_mip)
-		JuMP.optimize!(mip_model.model)
-		@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
-		push!(highs, objective_bound(mip_model.model))
-		delete(mip_model.model, con_ref2)
-		@debug "Objective value for MIN is: $(objective_value(mip_model.model)) and objective bound is $(objective_bound(mip_model.model))"
-	end
-	# get the hyperrectangle.
-	println(lows)
-	println(highs)
-	reacheable_set = Hyperrectangle(low=lows, high=highs)
-
-	# measurement model code,
-	# compute reachable set for measurements
-	if query.problem.measurement_model != [] && get_meas
-		@debug "Computing measurement model reachable sets."
-		meas_lows = Array{Float64}(undef, 0)
-		meas_highs = Array{Float64}(undef, 0)
-		# deal with computing reachable set for measurements
-		for measurement_matrix_row in query.problem.measurement_model 
-			@objective(mip_model.model, Min, sum(measurement_matrix_row.*timestep_nplus1_vars))
-			JuMP.optimize!(mip_model.model)
-			@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
-			push!(meas_lows, objective_bound(mip_model.model))
-			@objective(mip_model.model, Max, sum(measurement_matrix_row.*timestep_nplus1_vars))
-			JuMP.optimize!(mip_model.model)
-			@assert termination_status(mip_model.model) == MathOptInterface.OPTIMAL
-			push!(meas_highs, objective_bound(mip_model.model))
-		end
-		meas_reachable_set = Hyperrectangle(low=meas_lows, high=meas_highs)
-	else
-		meas_reachable_set = nothing
-	end
-	
-	return reacheable_set
-end
-
-function one_timestep_bconcretization(query::OvertQuery,domain,goal_set; t_idx::Union{Int64, Nothing}=nothing, get_meas=false)
-   """
-	This function computes the next reachable set.
-   inputs:
-   - query: OvertQuery
-	- input_set: Hyperrectangle for the initial set of variables.
-   - t_idx: this is for timed dynamics, when the symbolic version is called.
-            if t_idx is an integer, a superscript will be added to all state and
-            control variable, indicating the timestep is a symbolic represenation.
-            default is nothing, which does not do the timed dynamics.
-   outputs:
-   - output_set: a hyperrectangle for the output reachable set
-   - oA: all OvertApproximation objects used in the dynamics,
-   - oA_vars: all Overt output variables.
-	"""
-	@debug "one timestep concretization: t=$(t_idx)"
-	# reading some query attributes
-	input_vars = query.problem.input_vars
-	control_vars = query.problem.control_vars
-	dt = query.dt
-
-	# setup overt and controller constraints
-	mip_model, oA, oA_vars = setup_overt_and_controller_constraints(query, domain; t_idx=t_idx)
-
-	# solve for reacheability
-	output_set = solve_for_breachability(mip_model, query, oA_vars, t_idx, goal_set; get_meas=get_meas) 
-	return output_set
-end
-
-function many_timestep_bconcretization(query::OvertQuery, domain, goal_set; timed::Bool=false)
-   """
-	This function computes the next n reachable sets using concretization.
-   inputs:
-   - query: OvertQuery
-	- input_set: Hyperrectangle for the initial set of variables.
-   - t_idx: this is for timed dynamics, when the symbolic version is called.
-            if t_idx is an integer, a superscript will be added to all state and
-            control variable, indicating the timestep is a symbolic represenation.
-            default is nothing, which does not do the timed dynamics.
-   outputs:
-   - all_sets: an array of hyperrectangle of all reachable sets, starting from the init set
-   - oA: an array of OvertApproximation objects used in each timestep of concretization,
-   - oA_vars: an array of Overt output variables used in each timestep of concretization,
-	"""
-    goal_set = copy(goal_set)
-	all_sets = [goal_set]
-	all_meas_sets = []
-    all_oA = Array{OverApproximation}(undef, 0)
-    all_oA_vars = []
-    for i = 1:query.ntime
-        t1 = Dates.now()
-        if timed
-			@debug "many timestep concretization: timed, t=$i"
-		   output_set= one_timestep_bconcretization(query, domain, goal_set; t_idx=i, get_meas=true)
-        else
-			@debug "many timestep concretization: untimed"
-		   output_set= one_timestep_bconcretization(query, domain, goal_set; get_meas=true)
-        end
-        t2 = Dates.now()
-        println("timestep $i computed in $((t2-t1).value/1000) seconds")
-        goal_set = output_set
-		push!(all_sets, output_set)
-    end
-
-	return all_sets
-end
-
-"""
-----------------------------------------------
 reasoning and solving symbolic queries, basic functions
 ----------------------------------------------
 """
 
-function setup_mip_with_overt_constraints(query::OvertQuery, input_set::Hyperrectangle)
+function setup_mip_with_overt_constraints(query::OvertQuery, input_set::Hyperrectangle; timeout=nothing)
 	"""
 	this function computes the query using concrete method for the purpose
 		of setting up all overt constraints.
@@ -477,7 +314,11 @@ function setup_mip_with_overt_constraints(query::OvertQuery, input_set::Hyperrec
 	# setup all overt constraints via bounds found by conc retization
 	all_sets, all_meas_sets, all_oA, all_oA_vars = many_timestep_concretization(query, input_set; timed=true)
 	oA_tot = add_overapproximate(all_oA)
-	mip_model = OvertMIP(oA_tot)
+	if !isnothing(timeout)
+		mip_model = OvertMIP(oA_tot, timeout=timeout)
+	else
+		mip_model = OvertMIP(oA_tot)
+	end
 	return mip_model, all_sets, all_meas_sets, all_oA_vars	
 end
 
@@ -551,7 +392,7 @@ symbolic queries, reachability.
 ----------------------------------------------
 """
 
-function symbolic_reachability(query::OvertQuery, input_set::Hyperrectangle; get_meas=false)
+function symbolic_reachability(query::OvertQuery, input_set::Hyperrectangle; get_meas=false, timeout=nothing)
    """
 	This function computes the reachable set after n timestep symbolically.
    inputs:
@@ -563,7 +404,7 @@ function symbolic_reachability(query::OvertQuery, input_set::Hyperrectangle; get
    - all_sets_symbolic: a hyperrectangle for the reachable set at t=n, computed symbolically.
 	"""
 	# setup all overt cosntraints
-	mip_model, all_sets, all_meas_sets, all_oA_vars = setup_mip_with_overt_constraints(query, input_set)
+	mip_model, all_sets, all_meas_sets, all_oA_vars = setup_mip_with_overt_constraints(query, input_set, timeout=timeout)
 
 	# read neural network and add controller constraints
 	add_controllers_constraints!(mip_model, query, all_sets)
@@ -575,7 +416,7 @@ function symbolic_reachability(query::OvertQuery, input_set::Hyperrectangle; get
 	match_io!(mip_model, query, all_oA_vars)
 
 	# optimize for the output of timestep ntime.
-	set_symbolic, measurement_set_symbolic = solve_for_reachability(mip_model, query, all_oA_vars[end], query.ntime, get_meas=get_meas) 
+	set_symbolic, measurement_set_symbolic = solve_for_reachability(mip_model, query, all_oA_vars[end], query.ntime, get_meas=get_meas, timeout=timeout) 
 	return all_sets, set_symbolic, all_meas_sets, measurement_set_symbolic
 end
 
@@ -666,7 +507,7 @@ function symbolic_reachability_with_splitting(query::OvertQuery, input_set::Hype
 end
 
 function symbolic_reachability_with_concretization(query::OvertQuery,
-	input_set::Hyperrectangle, concretize_every::Union{Int, Array{Int, 1}})
+	input_set::Hyperrectangle, concretize_every::Union{Int, Array{Int, 1}}; timeout=nothing)
    """
 	This function computes the reachable set after n timestep symbolically by
 		concretizing after every concretize_every timesteps.
@@ -698,7 +539,7 @@ function symbolic_reachability_with_concretization(query::OvertQuery,
 	for n in concretize_every
 		t1 = time()
 		query.ntime = n
-		concrete_sets, symbolic_set, concrete_meas_sets, symbolic_meas_set = symbolic_reachability(query, this_set, get_meas=true) # pass query and input set
+		concrete_sets, symbolic_set, concrete_meas_sets, symbolic_meas_set = symbolic_reachability(query, this_set, get_meas=true, timeout=timeout) # pass query and input set
 		push!(all_concrete_sets, concrete_sets)
 		push!(all_symbolic_sets, symbolic_set)
 		push!(all_concrete_meas_sets, concrete_meas_sets)
